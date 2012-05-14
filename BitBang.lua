@@ -4,6 +4,7 @@ local bit = require "bit"
 local band = bit.band
 local bor = bit.bor
 local bxor = bit.bxor
+local bnot = bit.bnot
 local rshift = bit.rshift
 
 ffi.cdef[[
@@ -31,7 +32,7 @@ function setbit(value, bit)
 end
 
 function clearbit(value, bit)
-	return bxor(value, 2^bit)
+	return band(value, bnot(2^bit))
 end
 
 function numbertobinary(value, nbits, bigendian)
