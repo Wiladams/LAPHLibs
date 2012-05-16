@@ -32,8 +32,8 @@ local lshift = bit.lshift
 
 
 function strcmp(s1, s2)
-	local s1ptr = ffi.cast("uint8_t *", s1);
-	local s2ptr = ffi.cast("uint8_t *", s2);
+	local s1ptr = ffi.cast("const uint8_t *", s1);
+	local s2ptr = ffi.cast("const uint8_t *", s2);
 
 	-- uint8_t
 	local uc1;
@@ -63,8 +63,8 @@ end
 
 
 function strncmp(str1, str2, num)
-	local ptr1 = ffi.cast("uint8_t*", str1)
-	local ptr2 = ffi.cast("uint8_t*", str2)
+	local ptr1 = ffi.cast("const uint8_t*", str1)
+	local ptr2 = ffi.cast("const uint8_t*", str2)
 
 	for i=0,num-1 do
 		if str1[i] == 0 or str2[i] == 0 then return 0 end
@@ -77,8 +77,8 @@ function strncmp(str1, str2, num)
 end
 
 function strncasecmp(str1, str2, num)
-	local ptr1 = ffi.cast("uint8_t*", str1)
-	local ptr2 = ffi.cast("uint8_t*", str2)
+	local ptr1 = ffi.cast("const uint8_t*", str1)
+	local ptr2 = ffi.cast("const uint8_t*", str2)
 
 	for i=0,num-1 do
 		if str1[i] == 0 or str2[i] == 0 then return 0 end
@@ -92,8 +92,8 @@ end
 
 
 function strcasecmp(str1, str2)
-	local ptr1 = ffi.cast("uint8_t*", str1)
-	local ptr2 = ffi.cast("uint8_t*", str2)
+	local ptr1 = ffi.cast("const uint8_t*", str1)
+	local ptr2 = ffi.cast("const uint8_t*", str2)
 
 	local num = math.min(strlen(ptr1), strlen(ptr2))
 	for i=0,num-1 do
@@ -127,7 +127,7 @@ function strndup(str,n)
 end
 
 function strdup(str)
-	str = ffi.cast("char *", str)
+	str = ffi.cast("const char *", str)
 	local len = strlen(str)
 
 	local newstr = ffi.new("char["..(len+1).."]");
@@ -139,7 +139,7 @@ end
 
 function strcpy(dst, src)
 	local dstptr = ffi.cast("char *", dst)
-	local srcptr = ffi.cast("char *", src)
+	local srcptr = ffi.cast("const char *", src)
 
      -- Do the copying in a loop.
      while (dstptr[0] ~= 0 and srcptr[0] ~= 0) do
@@ -154,7 +154,7 @@ end
 
 function strlcpy(dst, src, size)
 	local dstptr = ffi.cast("char *", dst)
-	local srcptr = ffi.cast("char *", src)
+	local srcptr = ffi.cast("const char *", src)
 
 	local len = strlen(src)
 	local len = math.min(size-1,len)
@@ -168,7 +168,7 @@ end
 function strlcat(dst, src, size)
 
 	local dstptr = ffi.cast("char *", dst)
-	local srcptr = ffi.cast("char *", src)
+	local srcptr = ffi.cast("const char *", src)
 
 	local dstlen = strlen(dstptr);
 	local dstremaining = size-dstlen-1
@@ -186,14 +186,16 @@ end
 
 
 function strchr(s, c)
-	while s[0] ~= c do
-		if s[0] == 0 then
+	local p = ffi.cast("const char *", s);
+
+	while p[0] ~= c do
+		if p[0] == 0 then
 			return nil
 		end
-		s = s + 1;
+		p = p + 1;
 	end
 
-	return s
+	return p
 end
 
 
@@ -203,7 +205,7 @@ function strstr(str, target)
 		return str;
 	end
 
-	local p1 = str;
+	local p1 = ffi.cast("const char *", str);
 
 	while (p1[0] ~= 0) do
 
@@ -231,10 +233,15 @@ end
 --]]
 
 -- Given two null terminated strings
+-- return how many bytes they have in common
+-- this is for prefix matching
 function string_same(a, b)
+	local p1 = ffi.cast("const char *", a);
+	local p2 = ffi.cast("const char *", b);
+
     local bytes = 0;
 
-    while (a[bytes] ~= 0 and b[bytes] ~= 0 and a[bytes] == b[bytes]) do
+    while (p1[bytes] ~= 0 and p2[bytes] ~= 0 and p1[bytes] == p2[bytes]) do
 		bytes = bytes+1
     end
 
@@ -243,9 +250,10 @@ end
 
 -- Stringify binary data. Output buffer must be twice as big as input,
 -- because each byte takes 2 bytes in string representation
-local hex = strdup("0123456789abcdef");
 
 function bin2str(to, p, len)
+	local hex = ffi.cast("const char *", "0123456789abcdef")
+
 --print("bin2str, len: ", len);
 	local off1, off2;
 	while (len > 0) do
