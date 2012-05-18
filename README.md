@@ -8,6 +8,10 @@ while programming in LuaJIT.  In particular, there are
 a number of functions that are useful when you're programming
 using the FFI.
 
+ascii.lua
+=========
+This file contains a table of the ASCII character set, with numeric values and descriptions.  There are routines to create constant values from the table.
+
 BitBang.lua
 ===========
 Lowest level bit twiddling.  Builds upon the bitops

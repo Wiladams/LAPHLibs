@@ -1,3 +1,31 @@
+--[[
+	This table and the accompanying routines can be used
+	for several different purposes.  If an application has
+	the need for ASCII characters with names and descriptions,
+	it can just access the table directly.  
+	
+	Another usage is to use the table to generate constant
+	values, that are easy to use.  The GetASCIITokens() function
+	will create a string that contains all of the characters
+	represented as constants, such as:
+	
+	T_A = 65;
+	T_CR = 13;
+	T_COLON = 58;
+	
+	This string can be copied into a program and the values used.
+	
+	Another way to do it is to use the routines is to run the 
+	function: CreateASCIITokens()
+	
+	This will first run GetASCIITokens(), to get a string representing
+	the constants, then it will use loadstring() to actually make the 
+	constants available in the running program.
+	
+	The most likely usage is to simply generate the string, and copy
+	it into your program and use the constants.
+--]]
+
 ASCIILookupTable = {
 {"NUL",		0, "null"};
 {"SOH",		1, "start of heading"};
@@ -147,6 +175,7 @@ end
 
 --print(GetASCIITokens())
 
-CreateASCIITokens();
+-- Use the following if you want character constants
+-- to be available in your program
+--CreateASCIITokens();
 
---print(string.char(T_TILDE))
