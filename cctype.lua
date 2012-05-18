@@ -17,6 +17,10 @@ function isalpha(c)
 	return (tolower(c) >= t_a and tolower(c) <= t_z)
 end
 
+function isascii(c)
+	return (c > 0) and (c < 0x80)
+end
+
 function isdigit(c)
 	return c >= t_0 and c <= t_9
 end
