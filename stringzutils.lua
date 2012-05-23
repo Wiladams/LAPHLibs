@@ -198,6 +198,19 @@ function strchr(s, c)
 	return p
 end
 
+function strrchr(s, c)
+	local p = ffi.cast("const char *", s);
+	local offset = strlen(p);
+
+	while offset >= 0 do
+		if p[offset] == c then
+			return p+offset
+		end
+		offset = offset - 1;
+	end
+
+	return nil
+end
 
 function strstr(str, target)
 
@@ -271,4 +284,6 @@ function bin2str(to, p, len)
 	end
 	to[0] = 0;
 end
+
+
 
