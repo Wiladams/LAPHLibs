@@ -9,13 +9,14 @@ local lshift = bit.lshift
 	binary functions
 
 	ARRAY_SIZE
-	NewStruct
 	isbyte
 	bzero
 	bcopy
 	bcmp
 --]]
 
+-- This is a hack
+-- It will only work with a one dimensional array, and not with pointers
 function ARRAY_SIZE(array)
 	local typestr = tostring(ffi.typeof(array))
 
@@ -24,15 +25,6 @@ function ARRAY_SIZE(array)
 
 	return tonumber(nelem)
 end
-
-
-function NewStruct(structname)
-	if not cast then return nil end
-
-	local size = ffi.sizeof(structname)
-	return ffi.cast(structname,ffi.new("uint8_t["..size.."]"));
-end
-
 
 function isbyte(n)
 	return band(n,0xff) == n
@@ -74,8 +66,8 @@ function memcpy(dest, src, nbytes)
 end
 
 function memcmp(ptr1, ptr2, nbytes)
-	local p1 = ffi.cast("uint8_t *", ptr1)
-	local p2 = ffi.cast("uint8_t *", ptr2)
+	local p1 = ffi.cast("const uint8_t *", ptr1)
+	local p2 = ffi.cast("const uint8_t *", ptr2)
 
 	for i=0,nbytes do
 		if p1[i] ~= p2[i] then return -1 end
@@ -85,16 +77,16 @@ function memcmp(ptr1, ptr2, nbytes)
 end
 
 function memchr(ptr, value, num)
-	ptr = ffi.cast("uint8_t *", ptr)
+	local p = ffi.cast("const uint8_t *", ptr)
 	for i=0,num-1 do
-		if ptr[i] == value then return ptr+i end
+		if p[i] == value then return p+i end
 	end
 
 	return nil
 end
 
 function memmove(dst, src, num)
-	local srcptr = ffi.cast("uint8_t*", src)
+	local srcptr = ffi.cast("const uint8_t*", src)
 
 	-- If equal, just return
 	if dst == srcptr then return dst end
@@ -113,12 +105,3 @@ function memmove(dst, src, num)
 	end
 	return dst
 end
-
-
-
-
-
-
-
-
-

@@ -128,6 +128,8 @@ end
 
 function strdup(str)
 	str = ffi.cast("const char *", str)
+	-- use strlen because we don't know what kind of string
+	-- we're being passed.  It could be a Lua string, or a byte array
 	local len = strlen(str)
 
 	local newstr = ffi.new("char["..(len+1).."]");
@@ -166,7 +168,6 @@ function strlcpy(dst, src, size)
 end
 
 function strlcat(dst, src, size)
-
 	local dstptr = ffi.cast("char *", dst)
 	local srcptr = ffi.cast("const char *", src)
 
@@ -264,9 +265,9 @@ end
 -- Stringify binary data. Output buffer must be twice as big as input,
 -- because each byte takes 2 bytes in string representation
 
-function bin2str(to, p, len)
-	local hex = ffi.cast("const char *", "0123456789abcdef")
+local hex = strdup("0123456789abcdef")
 
+function bin2str(to, p, len)
 --print("bin2str, len: ", len);
 	local off1, off2;
 	while (len > 0) do

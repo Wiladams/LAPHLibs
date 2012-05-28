@@ -9,6 +9,7 @@ function tolower(c)
 end
 
 local t_a = string.byte('a')
+local t_f = string.byte('f')
 local t_z = string.byte('z')
 local t_0 = string.byte('0')
 local t_9 = string.byte('9')
@@ -25,6 +26,17 @@ function isdigit(c)
 	return c >= t_0 and c <= t_9
 end
 
+function isxdigit(c)
+	if isdigit(c) then return true end
+	
+	local lowered = tolower(c);
+	if lowered >= t_a and lowered <= t_f then
+		return true
+	end
+	
+	return false
+end
+
 function islanum(c)
 	return (isalpha(c) or isdigit(c))
 end
@@ -35,8 +47,6 @@ function isspace(c)
 	  c == 0x0a or c == 0x0b or c == 0x0c or c == 0x0d
 end
 
-function isxdigit(c)
-	return (isdigit(c) or (tolower(c) >= string.byte('a') and tolower(c) <= string.byte('f')))
-end
+
 
 
