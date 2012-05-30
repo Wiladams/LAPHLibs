@@ -287,4 +287,15 @@ function bin2str(to, p, len)
 end
 
 
+local function bintohex(s)
+	return (s:gsub('(.)', function(c)
+		return string.format('%02x', string.byte(c))
+	end))
+end
+
+local function hextobin(s)
+	return (s:gsub('(%x%x)', function(hex)
+		return string.char(tonumber(hex, 16))
+	end))
+end
 
