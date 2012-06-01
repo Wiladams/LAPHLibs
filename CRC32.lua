@@ -89,8 +89,23 @@ CRC32_consts = ffi.new("uint32_t[256]",{
 	0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
 	});
 
--- Calculate a CRC32 for a Lua String
-function CRC32(s)
+-- Calculate a CRC for any buffer
+-- This one is the most general purpose
+function CRC32l(src, len, offset)
+	offset = offset or 0
+	local crc = 0xFFFFFFFF;
+	local p = ffi.cast("const uint8_t *", src)
+	p = p + offset
+
+	for i=0, len-1  do
+		crc = bxor(rshift(crc, 8), CRC32_consts[band(bxor(crc, p[i]), 0xFF)])
+	end
+
+	return bxor(crc, -1)
+end
+
+-- Calculate a CRC32 for a null terminated string
+function CRC32z(s)
 	local crc = 0xFFFFFFFF;
 	local p = ffi.cast("const uint8_t *", s)
 	local i = 0
@@ -103,9 +118,21 @@ function CRC32(s)
 	return bxor(crc, -1)
 end
 
+function CRC32(src)
+	if type(src) == "string" then
+		return CRC32l(src, #src)
+	end
 
----[[
-print(string.format("0x%08x",CRC32("Test vector from febooti.com")));
-print(string.format("0x%08x",CRC32("123456789")));
+	if type(src) == "cdata" then
+		return CRC32l(src, ffi.sizeof(src))
+	end
+end
+
+--[[
+local str1 = "Test vector from febooti.com";
+local str2 = "123456789"
+
+print(string.format("0x%08x",CRC32(str1)));
+print(string.format("0x%08x",CRC32(str2)));
 
 --]]

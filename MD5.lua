@@ -24,12 +24,8 @@ MD5_CTX = ffi.typeof("MD5_CTX");
 function byteReverse(buf, len)
 end
 
-function F1(x, y, z)
-	return bxor(z, band(x, bxor(y, z)))
-end
-
+function F1(x, y, z) return bxor(z, band(x, bxor(y, z))) end
 function F2(x, y, z) return F1(z, x, y) end
-
 function F3(x, y, z) return bxor(x, y, z) end
 function F4(x, y, z) return bxor(y, bor(x, bnot(z))) end
 
@@ -218,8 +214,8 @@ end
 function md5(luastr)
 	local buf = ffi.new("char[33]");
 	local hash = ffi.new("uint8_t[16]");
-	local len = string.len(luastr)
-	local p = ffi.cast("char *", luastr);
+	local len = #luastr
+	local p = ffi.cast("const char *", luastr);
 
 	local ctx = MD5_CTX();
 

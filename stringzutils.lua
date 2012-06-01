@@ -144,7 +144,7 @@ function strcpy(dst, src)
 	local srcptr = ffi.cast("const char *", src)
 
      -- Do the copying in a loop.
-     while (dstptr[0] ~= 0 and srcptr[0] ~= 0) do
+     while (srcptr[0] ~= 0) do
 		dstptr[0] = srcptr[0];
 		dstptr = dstptr + 1;
 		srcptr = srcptr + 1;
@@ -299,3 +299,18 @@ local function hextobin(s)
 	end))
 end
 
+return {
+	strchr = strchr,
+	strrchr = strrchr,
+	strcmp = strcmp,
+	strncmp = strncmp,
+	strcpy = strcpy,
+	strdup = strdup,
+	strstr = strstr,
+	
+	strlcat = strlcat,
+	strlcpy = strlcpy,
+	
+	bintohex = bintohex,
+	hextobin = hextobin,
+}
