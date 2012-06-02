@@ -99,16 +99,17 @@ function strcasecmp(str1, str2)
 	for i=0,num-1 do
 		if str1[i] == 0 or str2[i] == 0 then return 0 end
 
-		if ptr1[i] > ptr2[i] then return 1 end
-		if ptr1[i] < ptr2[i] then return -1 end
+		if tolower(ptr1[i]) > tolower(ptr2[i]) then return 1 end
+		if tolower(ptr1[i]) < tolower(ptr2[i]) then return -1 end
 	end
 
 	return 0
 end
 
 function strlen(str)
+	local ptr = ffi.cast("uint8_t *", str);
 	local idx = 0
-	while str[idx] ~= 0 do
+	while ptr[idx] ~= 0 do
 		idx = idx + 1
 	end
 
@@ -143,12 +144,12 @@ function strcpy(dst, src)
 	local dstptr = ffi.cast("char *", dst)
 	local srcptr = ffi.cast("const char *", src)
 
-     -- Do the copying in a loop.
-     while (srcptr[0] ~= 0) do
+	-- Do the copying in a loop.
+	while (srcptr[0] ~= 0) do
 		dstptr[0] = srcptr[0];
 		dstptr = dstptr + 1;
 		srcptr = srcptr + 1;
-     end
+	end
 
 	-- Return the destination string.
 	return dst;
@@ -300,17 +301,8 @@ local function hextobin(s)
 end
 
 return {
-	strchr = strchr,
-	strrchr = strrchr,
-	strcmp = strcmp,
-	strncmp = strncmp,
-	strcpy = strcpy,
-	strdup = strdup,
-	strstr = strstr,
-	
-	strlcat = strlcat,
-	strlcpy = strlcpy,
-	
+	strlen = strlen,
+
 	bintohex = bintohex,
 	hextobin = hextobin,
 }

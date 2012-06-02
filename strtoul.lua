@@ -162,3 +162,7 @@ function strtol(str, endptr, base)
 
     return _strto_l(str, endptr, base, false);
 end
+
+function atoi(str)
+	return _strto_l(str, nil, 10, false);
+end
