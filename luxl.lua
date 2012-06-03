@@ -294,7 +294,7 @@ function luxl:GetNext()
 							self.event = PICO_STATES[j].event;
 							fired = true;
 							if(self.EventHandler) then
-								self.EventHandler(p.event, self.markix, self.marksz)
+								self.EventHandler(self.event, self.markix, self.marksz)
 							end
 						end
 					end
@@ -319,7 +319,7 @@ function luxl:GetNext()
 	end
 
 	if(not fired) then
-		self.event = PICO_EVENT_END_DOC;
+		self.event = EVENT_END_DOC;
 	end
 
 	return self.event, self.markix, self.marksz;
@@ -328,7 +328,7 @@ end
 function luxl:Lexemes()
 	return function()
 		local event, offset, size = self:GetNext();
-		if(event == PICO_EVENT_END_DOC) then
+		if(event == EVENT_END_DOC) then
 			return nil;
 		else
 			return event, offset, size;
