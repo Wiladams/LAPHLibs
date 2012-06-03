@@ -80,44 +80,44 @@ local char_type = ffi.new("const int[256]", {
 
 -- Types of events: start element, end element, text, attr name, attr
 --   val and start/end document. Other events can be ignored!
-EVENT_START = 0; -- Start tag
-EVENT_END = 1;       -- End tag
-EVENT_TEXT = 2;      -- Text
-EVENT_ATTR_NAME = 3; -- Attribute name
-EVENT_ATTR_VAL = 4;  -- Attribute value
-EVENT_END_DOC = 5;   -- End of document
-EVENT_MARK = 6;      -- Internal only; notes position in buffer
-EVENT_NONE = 7;      -- Internal only; should never see this event
+local EVENT_START = 0; -- Start tag
+local EVENT_END = 1;       -- End tag
+local EVENT_TEXT = 2;      -- Text
+local EVENT_ATTR_NAME = 3; -- Attribute name
+local EVENT_ATTR_VAL = 4;  -- Attribute value
+local EVENT_END_DOC = 5;   -- End of document
+local EVENT_MARK = 6;      -- Internal only; notes position in buffer
+local EVENT_NONE = 7;      -- Internal only; should never see this event
 
 
 -- Internal states that the parser can be in at any given time.
-ST_START = 0;         -- starting base state; default state
-ST_TEXT =1;              -- text state
-ST_START_TAG = 2;         -- start tag state
-ST_START_TAGNAME =3;     -- start tagname state
-ST_START_TAGNAME_END =4; -- start tagname ending state
-ST_END_TAG =5;           -- end tag state
-ST_END_TAGNAME=6;       -- end tag tagname state
-ST_END_TAGNAME_END=7;   -- end tag tagname ending
-ST_EMPTY_TAG=8;         -- empty tag state
-ST_SPACE=9;             -- linear whitespace state
-ST_ATTR_NAME=10;         -- attribute name state
-ST_ATTR_NAME_END=11;     -- attribute name ending state
-ST_ATTR_VAL=12;          -- attribute value starting state
-ST_ATTR_VAL2=13;         -- attribute value state
-ST_ERROR=14;              -- error state
+local ST_START = 0;         -- starting base state; default state
+local ST_TEXT =1;              -- text state
+local ST_START_TAG = 2;         -- start tag state
+local ST_START_TAGNAME =3;     -- start tagname state
+local ST_START_TAGNAME_END =4; -- start tagname ending state
+local ST_END_TAG =5;           -- end tag state
+local ST_END_TAGNAME=6;       -- end tag tagname state
+local ST_END_TAGNAME_END=7;   -- end tag tagname ending
+local ST_EMPTY_TAG=8;         -- empty tag state
+local ST_SPACE=9;             -- linear whitespace state
+local ST_ATTR_NAME=10;         -- attribute name state
+local ST_ATTR_NAME_END=11;     -- attribute name ending state
+local ST_ATTR_VAL=12;          -- attribute value starting state
+local ST_ATTR_VAL2=13;         -- attribute value state
+local ST_ERROR=14;              -- error state
 
 -- character classes that we will match against; This could be expanded if
 --   need be, however, we are aiming for simple.
-CCLASS_NONE = 0;         -- matches nothing; a base state
-CCLASS_LEFT_ANGLE=1;     -- matches start tag '<'
-CCLASS_SLASH=2;          -- matches forward slash
-CCLASS_RIGHT_ANGLE=3;    -- matches end tag '>'
-CCLASS_EQUALS=4;         -- matches equals sign
-CCLASS_QUOTE=5;          -- matches double-quotes
-CCLASS_LETTERS=6;        -- matches a-zA-Z letters and digits 0-9
-CCLASS_SPACE=7;          -- matches whitespace
-CCLASS_ANY=8;            -- matches any ASCII character; will match all above classes
+local CCLASS_NONE = 0;         -- matches nothing; a base state
+local CCLASS_LEFT_ANGLE=1;     -- matches start tag '<'
+local CCLASS_SLASH=2;          -- matches forward slash
+local CCLASS_RIGHT_ANGLE=3;    -- matches end tag '>'
+local CCLASS_EQUALS=4;         -- matches equals sign
+local CCLASS_QUOTE=5;          -- matches double-quotes
+local CCLASS_LETTERS=6;        -- matches a-zA-Z letters and digits 0-9
+local CCLASS_SPACE=7;          -- matches whitespace
+local CCLASS_ANY=8;            -- matches any ASCII character; will match all above classes
 
 
 --[[
@@ -201,8 +201,8 @@ local PICO_STATES = {
 };
 
 
-luxl = {}
-luxl_mt = {
+local luxl = {}
+local luxl_mt = {
 	__index = luxl
 }
 
