@@ -32,6 +32,7 @@ local band = bit.band
    indicates an illegal initial byte. Generated with a python script
    from the utf-8 std. */
 --]]
+--[[
 local utf8_len = ffi.new("const int[256]", {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -50,6 +51,7 @@ local utf8_len = ffi.new("const int[256]", {
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
   4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 0, 0
 });
+--]]
 
 --[[
  Types of characters; 0 is not valid, 1 is letters, 2 are digits
@@ -80,14 +82,14 @@ local char_type = ffi.new("const int[256]", {
 
 -- Types of events: start element, end element, text, attr name, attr
 --   val and start/end document. Other events can be ignored!
-local EVENT_START = 0; -- Start tag
-local EVENT_END = 1;       -- End tag
-local EVENT_TEXT = 2;      -- Text
-local EVENT_ATTR_NAME = 3; -- Attribute name
-local EVENT_ATTR_VAL = 4;  -- Attribute value
-local EVENT_END_DOC = 5;   -- End of document
-local EVENT_MARK = 6;      -- Internal only; notes position in buffer
-local EVENT_NONE = 7;      -- Internal only; should never see this event
+EVENT_START = 0; 	 -- Start tag
+EVENT_END = 1;       -- End tag
+EVENT_TEXT = 2;      -- Text
+EVENT_ATTR_NAME = 3; -- Attribute name
+EVENT_ATTR_VAL = 4;  -- Attribute value
+EVENT_END_DOC = 5;   -- End of document
+EVENT_MARK = 6;      -- Internal only; notes position in buffer
+EVENT_NONE = 7;      -- Internal only; should never see this event
 
 
 -- Internal states that the parser can be in at any given time.
@@ -235,9 +237,16 @@ end
 	characters in the input buffer. Returns an event type: start, end,
 	text, attr name, attr val
 --]]
+local T_LT = string.byte('<')
+local T_SLASH = string.byte('/')
+local T_GT = string.byte('>')
+local T_EQ = string.byte('=')
+local T_QUOTE = string.byte('"')
+
 function luxl:GetNext()
 	local j;
-	local c, jmp;
+	local c;
+	local jmp=1;
 	local ctype;
 	local match;
 
@@ -248,14 +257,14 @@ function luxl:GetNext()
 
 	while (i < self.bufsz and not fired) do
 		c = band(self.buf[i], 0xff);
-		jmp = utf8_len[c]; -- advance through buffer by utf-8 char sz
-		assert(jmp ~= 0);
+		ctype = char_type[c];
+		--jmp = utf8_len[c]; -- advance through buffer by utf-8 char sz
+		--assert(jmp ~= 0);
 		self.ix = self.ix + jmp;
 		if(self.MsgHandler) then
 			self.MsgHandler(i, self.state, c)
 		end
 
-		ctype = char_type[c];
 		j=1;
 		match = false;
 		while (PICO_STATES[j].state ~= ST_ERROR) do
@@ -263,20 +272,21 @@ function luxl:GetNext()
 				if PICO_STATES[j].cclass == CCLASS_LETTERS then
 					match = (ctype == 1 or ctype == 2);
 				elseif PICO_STATES[j].cclass == CCLASS_LEFT_ANGLE then
-					match = (c == string.byte('<'));
+					match = (c == T_LT);
 				elseif PICO_STATES[j].cclass ==  CCLASS_SLASH then
-					match = (c == string.byte('/'));
+					match = (c == T_SLASH);
 				elseif PICO_STATES[j].cclass == CCLASS_RIGHT_ANGLE then
-					match = (c == string.byte('>'));
+					match = (c == T_GT);
 				elseif PICO_STATES[j].cclass == CCLASS_EQUALS then
-					match = (c == string.byte('='));
+					match = (c == T_EQ);
 				elseif PICO_STATES[j].cclass == CCLASS_QUOTE then
-					match = (c == string.byte('"'));
+					match = (c == T_QUOTE);
 				elseif PICO_STATES[j].cclass == CCLASS_SPACE then
 					match = (ctype == 3);
 				elseif PICO_STATES[j].cclass == CCLASS_ANY then
 					match = true;
 				end
+
 
 
 				if(match) then
