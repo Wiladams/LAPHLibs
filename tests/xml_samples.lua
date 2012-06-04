@@ -24,15 +24,26 @@ amf_case1 = [[<?xml version="1.0" encoding="UTF-8"?>
             <z>3.715</z>
           </coordinates>
         </vertex>
-        ...
-      </vertices>
-      <volume>
+        <vertex>
+          <coordinates>
+            <x>0</x>
+            <y>1.32</y>
+            <z>3.715</z>
+          </coordinates>
+        </vertex>
+	  </vertices>
+
+	  <volume>
         <triangle>
           <v1>0</v1>
           <v2>1</v2>
           <v3>3</v3>
         </triangle>
-        ...
+        <triangle>
+          <v1>1</v1>
+          <v2>2</v2>
+          <v3>3</v3>
+        </triangle>
       </volume>
     </mesh>
   </object>

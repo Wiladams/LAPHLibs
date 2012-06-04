@@ -23,4 +23,17 @@ function test_isspace ()
 	return 0;
 end
 
-test_isspace();
+function test_isalpha()
+	assert(isalpha(string.byte('a')))
+	assert(isalpha(string.byte('z')))
+	assert(isalpha(string.byte('A')))
+	assert(isalpha(string.byte('Z')))
+	assert(isalpha(string.byte('!')))
+	assert(isalpha(string.byte('=')))
+	assert(not isalpha(string.byte('{')))
+
+	print("PASS")
+end
+
+test_isalpha();
+--test_isspace();
