@@ -2,7 +2,7 @@
 	References:
 
 	http://pic.dhe.ibm.com/infocenter/aix/v6r1/index.jsp?topic=%2Fcom.ibm.aix.basetechref%2Fdoc%2Fbasetrf1%2Fctype.htm
-
+	http://www.cplusplus.com/reference/clibrary/cctype/
 --]]
 
 local ffi = require "ffi"
@@ -13,6 +13,14 @@ local bor = bit.bor
 
 function tolower(c)
 	return band(0xff,bor(c, 0x20))
+end
+
+function toupper(c)
+	if (islower(c)) then
+		return band(c, 0x5f)
+	end
+
+	return c
 end
 
 local t_a = string.byte('a')
@@ -28,10 +36,8 @@ function isalnum(c)
 end
 
 function isalpha(c)
-	local lowered = tolower(c)
-	return (lowered >= t_a and lowered <= t_z)
-
-	--return (bor(c, 32) - t_a) < 26
+	return (c >= t_a and c <= t_z) or
+		(c >= t_A and c <= t_Z)
 end
 
 function isascii(c)
@@ -47,7 +53,7 @@ function isdigit(c)
 end
 
 function isgraph(c)
-	return (c-0x21) < 0x5e;
+	return c > 0x20 and c < 0x7f
 end
 
 function islower(c)
@@ -55,13 +61,22 @@ function islower(c)
 end
 
 function isprint(c)
-	return c >= 0x20 and c <= 0x7f
+	return c >= 0x20 and c < 0x7f
+end
+
+function ispunct(c)
+	return isgraph(c) and not isalnum(c)
+--[[
+	return (c>=0x21 and c<=0x2f) or
+		(c>=0x3a and c<=0x40) or
+		(c>=0x5b and c<=0x60) or
+		(c>=0x7b and c<=0x7e)
+--]]
 end
 
 -- ' ' 0x0a, '\t' 0x09, '\n' 0x0a, '\v' 0x0b, '\f' 0x0c, '\r' 0x0d
 function isspace(c)
-	return c == 0x20 or c == 0x09 or
-	  c == 0x0a or c == 0x0b or c == 0x0c or c == 0x0d
+	return c == 0x20 or (c >= 0x09 and c<=0x0d)
 end
 
 function isupper(c)
@@ -71,12 +86,9 @@ end
 function isxdigit(c)
 	if isdigit(c) then return true end
 
-	local lowered = tolower(c);
-	if lowered >= t_a and lowered <= t_f then
-		return true
-	end
+	return (c >= t_a and c <= t_f) or
+		(c >= t_A and c <= t_F)
 
-	return false
 end
 
 
