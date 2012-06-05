@@ -182,6 +182,33 @@ local T_GT = string.byte('>')
 local T_EQ = string.byte('=')
 local T_QUOTE = string.byte('"')
 
+local cclass_match = {
+[CCLASS_LETTERS] = "(ctype == 1 or ctype == 2)",
+[CCLASS_LEFT_ANGLE] = "(c == T_LT)",
+[CCLASS_SLASH] = "(c == T_SLASH)",
+[CCLASS_RIGHT_ANGLE] = "(c == T_GT)",
+[CCLASS_EQUALS] = "(c == T_EQ)",
+[CCLASS_QUOTE] = "(c == T_QUOTE)",
+[CCLASS_SPACE] = "(ctype == 3)",
+[CCLASS_ANY] = "true",
+}
+
+local STATES = {}
+for i=1,#LEXER_STATES do
+	local p_state = LEXER_STATES[i]
+	local state = STATES[p_state.state]
+	local cclasses
+	if not state then
+		cclasses = {}
+		state = { state = p_state.state, cclasses = cclasses }
+		STATES[p_state.state] = state
+	else
+		cclasses = state.cclasses
+	end
+	cclasses[#cclasses + 1] = p_state
+end
+
+
 local luxl = {
 	EVENT_START = EVENT_START; 	 -- Start tag
 	EVENT_END = EVENT_END;       -- End tag
@@ -245,7 +272,6 @@ function luxl:GetNext()
 	local j;
 	local c;
 	local ctype;
-	local match;
 
 
 	local i = self.ix;
@@ -260,56 +286,54 @@ function luxl:GetNext()
 			self.MsgHandler(i, self.state, c)
 		end
 
-		j=1;
-		match = false;
-		while (LEXER_STATES[j].state ~= ST_ERROR) do
-			if(LEXER_STATES[j].state == self.state) then
-				if LEXER_STATES[j].cclass == CCLASS_LETTERS then
-					match = (ctype == 1 or ctype == 2);
-				elseif LEXER_STATES[j].cclass == CCLASS_LEFT_ANGLE then
-					match = (c == T_LT);
-				elseif LEXER_STATES[j].cclass ==  CCLASS_SLASH then
-					match = (c == T_SLASH);
-				elseif LEXER_STATES[j].cclass == CCLASS_RIGHT_ANGLE then
-					match = (c == T_GT);
-				elseif LEXER_STATES[j].cclass == CCLASS_EQUALS then
-					match = (c == T_EQ);
-				elseif LEXER_STATES[j].cclass == CCLASS_QUOTE then
-					match = (c == T_QUOTE);
-				elseif LEXER_STATES[j].cclass == CCLASS_SPACE then
-					match = (ctype == 3);
-				elseif LEXER_STATES[j].cclass == CCLASS_ANY then
-					match = true;
-				end
-
-
-
-				if(match) then
-					-- we matched a character class
-					if(LEXER_STATES[j].event == EVENT_MARK) then
-						if(mark == 0) then
-							mark = i;
-						end -- mark the position
-					elseif(LEXER_STATES[j].event ~= EVENT_NONE) then
-						if(mark > 0) then
-							-- basically we are guaranteed never to have an event of
-							--   type EVENT_MARK or EVENT_NONE here.
-							self.markix = mark;
-							self.marksz = i-mark;
-							self.event = LEXER_STATES[j].event;
-							fired = true;
-							if(self.EventHandler) then
-								self.EventHandler(self.event, self.markix, self.marksz)
-							end
-						end
-					end
-
-					self.state = LEXER_STATES[j].next_state; -- change state
-					break; -- break out of loop though state search
-				end
+		local state = STATES[self.state]
+		local cclasses = state.cclasses
+		local match = false;
+		for j=1,#cclasses do
+			local cclass = cclasses[j]
+			if cclass.cclass == CCLASS_LETTERS then
+				match = (ctype == 1 or ctype == 2);
+			elseif cclass.cclass == CCLASS_LEFT_ANGLE then
+				match = (c == T_LT);
+			elseif cclass.cclass ==  CCLASS_SLASH then
+				match = (c == T_SLASH);
+			elseif cclass.cclass == CCLASS_RIGHT_ANGLE then
+				match = (c == T_GT);
+			elseif cclass.cclass == CCLASS_EQUALS then
+				match = (c == T_EQ);
+			elseif cclass.cclass == CCLASS_QUOTE then
+				match = (c == T_QUOTE);
+			elseif cclass.cclass == CCLASS_SPACE then
+				match = (ctype == 3);
+			elseif cclass.cclass == CCLASS_ANY then
+				match = true;
 			end
 
-			j = j + 1
+
+
+			if(match) then
+				-- we matched a character class
+				if(cclass.event == EVENT_MARK) then
+					if(mark == 0) then
+						mark = i;
+					end -- mark the position
+				elseif(cclass.event ~= EVENT_NONE) then
+					if(mark > 0) then
+						-- basically we are guaranteed never to have an event of
+						--   type EVENT_MARK or EVENT_NONE here.
+						self.markix = mark;
+						self.marksz = i-mark;
+						self.event = cclass.event;
+						fired = true;
+						if(self.EventHandler) then
+							self.EventHandler(self.event, self.markix, self.marksz)
+						end
+					end
+				end
+
+				self.state = cclass.next_state; -- change state
+				break; -- break out of loop though state search
+			end
 		end
 
 		if(match==0) then
