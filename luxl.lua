@@ -174,7 +174,6 @@ local T_GT = string.byte('>')
 local T_EQ = string.byte('=')
 local T_QUOTE = string.byte('"')
 
-local luxl_mt = {}
 local luxl = {
 	EVENT_START = EVENT_START; 	 -- Start tag
 	EVENT_END = EVENT_END;       -- End tag
@@ -184,10 +183,11 @@ local luxl = {
 	EVENT_END_DOC = EVENT_END_DOC;   -- End of document
 	EVENT_MARK = EVENT_MARK;      -- Internal only; notes position in buffer
 	EVENT_NONE = EVENT_NONE;      -- Internal only; should never see this event
+}
+local luxl_mt = { __index = luxl }
 
-
-	new = function(buffer, bufflen)
-		local obj = {
+function luxl.new(buffer, bufflen)
+	local newone = {
 		buf = buffer;			-- pointer to "uint8_t *" buffer (0 based)
 		bufsz = bufflen;		-- size of input buffer
 		state = ST_START;		-- current state
@@ -199,16 +199,17 @@ local luxl = {
 		MsgHandler = nil;		-- Routine to handle messages
 		ErrHandler = nil;		-- Routine to call when there's an error
 		EventHandler = nil;
-		}
-		setmetatable(obj, luxl_mt);
+	}
+	setmetatable(newone, luxl_mt);
 
-		return obj;
-		end,
-		
-	SetMessageHandler = function(self, handler)
-		self.MsgHandler = handler;
-	end,
-	
+	return newone;
+end
+
+
+function luxl:SetMessageHandler(handler)
+	self.MsgHandler = handler;
+end
+
 	--[[
 	GetNext is responsible for moving through the stream
 	of characters.  At the moment, it's fairly naive in 
@@ -223,106 +224,104 @@ local luxl = {
 	Returns event type, starting offset, size
 	--]]
 
-	GetNext = function(self)
-		local j;
-		local c;
-		local ctype;
-		local match;
-
-		local i = self.ix;
-		local fired=false;
-		local mark=0;
-
-		while (i < self.bufsz and not fired) do
-			c = band(self.buf[i], 0xff);
-			ctype = char_type[c];
-			self.ix = self.ix + 1;
-			if(self.MsgHandler) then
-				self.MsgHandler(i, self.state, c)
-			end
-
-			j=1;
-			match = false;
-			while (LEXER_STATES[j].state ~= ST_ERROR) do
-				if(LEXER_STATES[j].state == self.state) then
-					if LEXER_STATES[j].cclass == CCLASS_LETTERS then
-						match = (ctype == 1 or ctype == 2);
-					elseif LEXER_STATES[j].cclass == CCLASS_LEFT_ANGLE then
-						match = (c == T_LT);
-					elseif LEXER_STATES[j].cclass ==  CCLASS_SLASH then
-						match = (c == T_SLASH);
-					elseif LEXER_STATES[j].cclass == CCLASS_RIGHT_ANGLE then
-						match = (c == T_GT);
-					elseif LEXER_STATES[j].cclass == CCLASS_EQUALS then
-						match = (c == T_EQ);
-					elseif LEXER_STATES[j].cclass == CCLASS_QUOTE then
-						match = (c == T_QUOTE);
-					elseif LEXER_STATES[j].cclass == CCLASS_SPACE then
-						match = (ctype == 3);
-					elseif LEXER_STATES[j].cclass == CCLASS_ANY then
-						match = true;
-					end
+function luxl:GetNext()
+	local j;
+	local c;
+	local ctype;
+	local match;
 
 
+	local i = self.ix;
+	local fired=false;
+	local mark=0;
 
-					if(match) then
-						-- we matched a character class
-						if(LEXER_STATES[j].event == EVENT_MARK) then
-							if(mark == 0) then
-								mark = i;
-							end -- mark the position
-						elseif(LEXER_STATES[j].event ~= EVENT_NONE) then
-							if(mark > 0) then
-								-- basically we are guaranteed never to have an event of
-								--   type EVENT_MARK or EVENT_NONE here.
-								self.markix = mark;
-								self.marksz = i-mark;
-								self.event = LEXER_STATES[j].event;
-								fired = true;
-								if(self.EventHandler) then
-									self.EventHandler(self.event, self.markix, self.marksz)
-								end
+	while (i < self.bufsz and not fired) do
+		c = band(self.buf[i], 0xff);
+		ctype = char_type[c];
+		self.ix = self.ix + 1;
+		if(self.MsgHandler) then
+			self.MsgHandler(i, self.state, c)
+		end
+
+		j=1;
+		match = false;
+		while (LEXER_STATES[j].state ~= ST_ERROR) do
+			if(LEXER_STATES[j].state == self.state) then
+				if LEXER_STATES[j].cclass == CCLASS_LETTERS then
+					match = (ctype == 1 or ctype == 2);
+				elseif LEXER_STATES[j].cclass == CCLASS_LEFT_ANGLE then
+					match = (c == T_LT);
+				elseif LEXER_STATES[j].cclass ==  CCLASS_SLASH then
+					match = (c == T_SLASH);
+				elseif LEXER_STATES[j].cclass == CCLASS_RIGHT_ANGLE then
+					match = (c == T_GT);
+				elseif LEXER_STATES[j].cclass == CCLASS_EQUALS then
+					match = (c == T_EQ);
+				elseif LEXER_STATES[j].cclass == CCLASS_QUOTE then
+					match = (c == T_QUOTE);
+				elseif LEXER_STATES[j].cclass == CCLASS_SPACE then
+					match = (ctype == 3);
+				elseif LEXER_STATES[j].cclass == CCLASS_ANY then
+					match = true;
+				end
+
+
+
+				if(match) then
+					-- we matched a character class
+					if(LEXER_STATES[j].event == EVENT_MARK) then
+						if(mark == 0) then
+							mark = i;
+						end -- mark the position
+					elseif(LEXER_STATES[j].event ~= EVENT_NONE) then
+						if(mark > 0) then
+							-- basically we are guaranteed never to have an event of
+							--   type EVENT_MARK or EVENT_NONE here.
+							self.markix = mark;
+							self.marksz = i-mark;
+							self.event = LEXER_STATES[j].event;
+							fired = true;
+							if(self.EventHandler) then
+								self.EventHandler(self.event, self.markix, self.marksz)
 							end
 						end
-
-						self.state = LEXER_STATES[j].next_state; -- change state
-						break; -- break out of loop though state search
 					end
-				end
 
-				j = j + 1
+					self.state = LEXER_STATES[j].next_state; -- change state
+					break; -- break out of loop though state search
+				end
 			end
 
-			if(match==0) then
-				-- didn't match, default to start state
-				self.err = self.err + 1;
-				if self.ErrHandler then
-					self.ErrHandler(i, self.state, c);
-				end
-				self.state = ST_START;
+			j = j + 1
+		end
+
+		if(match==0) then
+			-- didn't match, default to start state
+			self.err = self.err + 1;
+			if self.ErrHandler then
+				self.ErrHandler(i, self.state, c);
 			end
-			i = i + 1
+			self.state = ST_START;
 		end
+		i = i + 1
+	end
 
-		if(not fired) then
-			self.event = EVENT_END_DOC;
-		end
+	if(not fired) then
+		self.event = EVENT_END_DOC;
+	end
 
-		return self.event, self.markix, self.marksz;
-	end,
+	return self.event, self.markix, self.marksz;
+end
 	
-	Lexemes = function(self)
-		return function()
-			local event, offset, size = self:GetNext();
-			if(event == EVENT_END_DOC) then
-				return nil;
-			else
-				return event, offset, size;
-			end
+function luxl:Lexemes()
+	return function()
+		local event, offset, size = self:GetNext();
+		if(event == EVENT_END_DOC) then
+			return nil;
+		else
+			return event, offset, size;
 		end
-	end,
-}
-luxl_mt.__index = luxl;
-
+	end
+end
 
 return luxl
