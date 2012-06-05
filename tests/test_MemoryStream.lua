@@ -32,6 +32,9 @@ function test_WriteReadStream()
 		print(string.char(c))
 		c=stream:ReadByte()
 	end
+
+	stream:Seek(1)
+	io.write("'",stream:ReadString(6),"'\n")
 end
 
 --test_ReadStream();

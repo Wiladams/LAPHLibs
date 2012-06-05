@@ -88,9 +88,25 @@ function isxdigit(c)
 
 	return (c >= t_a and c <= t_f) or
 		(c >= t_A and c <= t_F)
-
 end
 
+return {
+	isalnum = isalnum,
+	isalpha = isalpha,
+	isascii = isascii,
+	iscntrl = iscntrl,
+	isdigit = isdigit,
+	isgraph = isgraph,
+	islower = islower,
+	isprint = isprint,
+	ispunct = ispunct, 
+	isspace = isspace,
+	isupper = isupper,
+	isxdigit = isxdigit,
+	
+	tolower = tolower,
+	toupper = toupper,
+}
 
 
 

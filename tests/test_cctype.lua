@@ -1,6 +1,6 @@
 package.path = package.path..";..\\?.lua";
 
-require "cctype"
+local ctype = require "cctype"
 
 ffi = require "ffi"
 
@@ -8,11 +8,11 @@ function test_isspace ()
 
   local c;
   local i=0;
-  local str = ffi.cast("char *", "Example sentence to test isspace\n");
+  local str = ffi.cast("char *", "Example \vsentence\t to test isspace\n");
 
 	while (str[i] ~= 0) do
 		c = str[i];
-		if (isspace(c)) then
+		if (ctype.isspace(c)) then
 			c = string.byte('\n');
 		end
 
@@ -24,16 +24,17 @@ function test_isspace ()
 end
 
 function test_isalpha()
-	assert(isalpha(string.byte('a')))
-	assert(isalpha(string.byte('z')))
-	assert(isalpha(string.byte('A')))
-	assert(isalpha(string.byte('Z')))
-	assert(isalpha(string.byte('!')))
-	assert(isalpha(string.byte('=')))
-	assert(not isalpha(string.byte('{')))
+	assert(ctype.isalpha(string.byte('a')))
+	assert(ctype.isalpha(string.byte('z')))
+	assert(ctype.isalpha(string.byte('A')))
+	assert(ctype.isalpha(string.byte('Z')))
+	assert(not ctype.isalpha(string.byte('!')))
+	assert(not ctype.isalpha(string.byte('=')))
+	assert(not ctype.isalpha(string.byte('{')))
 
-	print("PASS")
 end
 
 test_isalpha();
---test_isspace();
+test_isspace();
+
+print("PASS")

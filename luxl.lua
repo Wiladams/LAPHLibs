@@ -14,7 +14,6 @@
 
 	Copyright (c) 2004-2006 by Brian O. Bush
 
-	This lua version contains no copyright
 
 ]]
 
@@ -23,40 +22,9 @@ local bit = require "bit"
 local band = bit.band
 
 
-
--- Tables and constants
-
---[[
-/* A table of the number of bytes in a UTF-8 sequence starting with
-   the character used as the array index.  Note: a zero entry
-   indicates an illegal initial byte. Generated with a python script
-   from the utf-8 std. */
---]]
---[[
-local utf8_len = ffi.new("const int[256]", {
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 0, 0
-});
---]]
-
 --[[
  Types of characters; 0 is not valid, 1 is letters, 2 are digits
-   (including '.') and 3 whitespace. Also generated with a throw-away
-   python script.
+   (including '.') and 3 whitespace. 
 --]]
 
 local char_type = ffi.new("const int[256]", {
@@ -79,9 +47,8 @@ local char_type = ffi.new("const int[256]", {
 });
 
 
-
 -- Types of events: start element, end element, text, attr name, attr
---   val and start/end document. Other events can be ignored!
+-- val and start/end document. Other events can be ignored!
 EVENT_START = 0; 	 -- Start tag
 EVENT_END = 1;       -- End tag
 EVENT_TEXT = 2;      -- Text
@@ -90,7 +57,6 @@ EVENT_ATTR_VAL = 4;  -- Attribute value
 EVENT_END_DOC = 5;   -- End of document
 EVENT_MARK = 6;      -- Internal only; notes position in buffer
 EVENT_NONE = 7;      -- Internal only; should never see this event
-
 
 -- Internal states that the parser can be in at any given time.
 ST_START = 0;         -- starting base state; default state
@@ -121,7 +87,6 @@ CCLASS_LETTERS=6;        -- matches a-zA-Z letters and digits 0-9
 CCLASS_SPACE=7;          -- matches whitespace
 CCLASS_ANY=8;            -- matches any ASCII character; will match all above classes
 
-
 --[[
  State transition table element; contains:
  (1) current state,
@@ -131,7 +96,7 @@ CCLASS_ANY=8;            -- matches any ASCII character; will match all above cl
 --]]
 
 -- Note: States must be grouped in match order AND grouped together!
-local PICO_STATES = {
+local LEXER_STATES = {
   -- [0-2] starting state, which also serves as the default state in case of error
   { state = ST_START,         cclass = CCLASS_SPACE,        next_state = ST_SPACE,             event = EVENT_NONE },
   { state = ST_START,         cclass = CCLASS_LEFT_ANGLE,   next_state = ST_START_TAG,         event = EVENT_NONE },
@@ -202,14 +167,16 @@ local PICO_STATES = {
   { state = ST_ERROR,         cclass = CCLASS_NONE,         next_state = ST_ERROR,             event = EVENT_NONE }
 };
 
+local T_LT = string.byte('<')
+local T_SLASH = string.byte('/')
+local T_GT = string.byte('>')
+local T_EQ = string.byte('=')
+local T_QUOTE = string.byte('"')
 
-luxl = {}
-luxl_mt = {
-	__index = luxl
-}
-
-function luxl.new(buffer, bufflen)
-	local newone = {
+local luxl_mt = {}
+local luxl = {
+	new = function(buffer, bufflen)
+		local obj = {
 		buf = buffer;			-- pointer to "uint8_t *" buffer (0 based)
 		bufsz = bufflen;		-- size of input buffer
 		state = ST_START;		-- current state
@@ -221,129 +188,130 @@ function luxl.new(buffer, bufflen)
 		MsgHandler = nil;		-- Routine to handle messages
 		ErrHandler = nil;		-- Routine to call when there's an error
 		EventHandler = nil;
-	}
-	setmetatable(newone, luxl_mt);
+		}
+		setmetatable(obj, luxl_mt);
 
-	return newone;
-end
+		return obj;
+		end,
+		
+	SetMessageHandler = function(self, handler)
+		self.MsgHandler = handler;
+	end,
+	
+	--[[
+	GetNext is responsible for moving through the stream
+	of characters.  At the moment, it's fairly naive in 
+	terms of character encodings.
+	
+	In a more robust implementation, luxl will read from a 
+	stream, which knows about the specific encoding, and 
+	will hand out code points based on that particular encoding.
+	
+	So, only straight ASCII for the moment.
+	
+	Returns event type, starting offset, size
+	--]]
 
+	GetNext = function(self)
+		local j;
+		local c;
+		local ctype;
+		local match;
 
-function luxl:SetMessageHandler(handler)
-	self.MsgHandler = handler;
-end
+		local i = self.ix;
+		local fired=false;
+		local mark=0;
 
---[[
-	This is the main driver that moves through the state table based on
-	characters in the input buffer. Returns an event type: start, end,
-	text, attr name, attr val
---]]
-local T_LT = string.byte('<')
-local T_SLASH = string.byte('/')
-local T_GT = string.byte('>')
-local T_EQ = string.byte('=')
-local T_QUOTE = string.byte('"')
+		while (i < self.bufsz and not fired) do
+			c = band(self.buf[i], 0xff);
+			ctype = char_type[c];
+			self.ix = self.ix + 1;
+			if(self.MsgHandler) then
+				self.MsgHandler(i, self.state, c)
+			end
 
-function luxl:GetNext()
-	local j;
-	local c;
-	local jmp=1;
-	local ctype;
-	local match;
-
-
-	local i = self.ix;
-	local fired=false;
-	local mark=0;
-
-	while (i < self.bufsz and not fired) do
-		c = band(self.buf[i], 0xff);
-		ctype = char_type[c];
-		--jmp = utf8_len[c]; -- advance through buffer by utf-8 char sz
-		--assert(jmp ~= 0);
-		self.ix = self.ix + jmp;
-		if(self.MsgHandler) then
-			self.MsgHandler(i, self.state, c)
-		end
-
-		j=1;
-		match = false;
-		while (PICO_STATES[j].state ~= ST_ERROR) do
-			if(PICO_STATES[j].state == self.state) then
-				if PICO_STATES[j].cclass == CCLASS_LETTERS then
-					match = (ctype == 1 or ctype == 2);
-				elseif PICO_STATES[j].cclass == CCLASS_LEFT_ANGLE then
-					match = (c == T_LT);
-				elseif PICO_STATES[j].cclass ==  CCLASS_SLASH then
-					match = (c == T_SLASH);
-				elseif PICO_STATES[j].cclass == CCLASS_RIGHT_ANGLE then
-					match = (c == T_GT);
-				elseif PICO_STATES[j].cclass == CCLASS_EQUALS then
-					match = (c == T_EQ);
-				elseif PICO_STATES[j].cclass == CCLASS_QUOTE then
-					match = (c == T_QUOTE);
-				elseif PICO_STATES[j].cclass == CCLASS_SPACE then
-					match = (ctype == 3);
-				elseif PICO_STATES[j].cclass == CCLASS_ANY then
-					match = true;
-				end
-
-
-
-				if(match) then
-					-- we matched a character class
-					if(PICO_STATES[j].event == EVENT_MARK) then
-						if(mark == 0) then
-							mark = i;
-						end -- mark the position
-					elseif(PICO_STATES[j].event ~= EVENT_NONE) then
-						if(mark > 0) then
-							-- basically we are guaranteed never to have an event of
-							--   type EVENT_MARK or EVENT_NONE here.
-							self.markix = mark;
-							self.marksz = i-mark;
-							self.event = PICO_STATES[j].event;
-							fired = true;
-							if(self.EventHandler) then
-								self.EventHandler(self.event, self.markix, self.marksz)
-							end
-						end
+			j=1;
+			match = false;
+			while (LEXER_STATES[j].state ~= ST_ERROR) do
+				if(LEXER_STATES[j].state == self.state) then
+					if LEXER_STATES[j].cclass == CCLASS_LETTERS then
+						match = (ctype == 1 or ctype == 2);
+					elseif LEXER_STATES[j].cclass == CCLASS_LEFT_ANGLE then
+						match = (c == T_LT);
+					elseif LEXER_STATES[j].cclass ==  CCLASS_SLASH then
+						match = (c == T_SLASH);
+					elseif LEXER_STATES[j].cclass == CCLASS_RIGHT_ANGLE then
+						match = (c == T_GT);
+					elseif LEXER_STATES[j].cclass == CCLASS_EQUALS then
+						match = (c == T_EQ);
+					elseif LEXER_STATES[j].cclass == CCLASS_QUOTE then
+						match = (c == T_QUOTE);
+					elseif LEXER_STATES[j].cclass == CCLASS_SPACE then
+						match = (ctype == 3);
+					elseif LEXER_STATES[j].cclass == CCLASS_ANY then
+						match = true;
 					end
 
-					self.state = PICO_STATES[j].next_state; -- change state
-					break; -- break out of loop though state search
+
+
+					if(match) then
+						-- we matched a character class
+						if(LEXER_STATES[j].event == EVENT_MARK) then
+							if(mark == 0) then
+								mark = i;
+							end -- mark the position
+						elseif(LEXER_STATES[j].event ~= EVENT_NONE) then
+							if(mark > 0) then
+								-- basically we are guaranteed never to have an event of
+								--   type EVENT_MARK or EVENT_NONE here.
+								self.markix = mark;
+								self.marksz = i-mark;
+								self.event = LEXER_STATES[j].event;
+								fired = true;
+								if(self.EventHandler) then
+									self.EventHandler(self.event, self.markix, self.marksz)
+								end
+							end
+						end
+
+						self.state = LEXER_STATES[j].next_state; -- change state
+						break; -- break out of loop though state search
+					end
 				end
+
+				j = j + 1
 			end
 
-			j = j + 1
-		end
-
-		if(match==0) then
-			-- didn't match, default to start state
-			self.err = self.err + 1;
-			if self.ErrHandler then
-				self.ErrHandler(i, self.state, c);
+			if(match==0) then
+				-- didn't match, default to start state
+				self.err = self.err + 1;
+				if self.ErrHandler then
+					self.ErrHandler(i, self.state, c);
+				end
+				self.state = ST_START;
 			end
-			self.state = ST_START;
+			i = i + 1
 		end
-		i = i + jmp
-	end
 
-	if(not fired) then
-		self.event = PICO_EVENT_END_DOC;
-	end
-
-	return self.event, self.markix, self.marksz;
-end
-
-function luxl:Lexemes()
-	return function()
-		local event, offset, size = self:GetNext();
-		if(event == PICO_EVENT_END_DOC) then
-			return nil;
-		else
-			return event, offset, size;
+		if(not fired) then
+			self.event = PICO_EVENT_END_DOC;
 		end
-	end
-end
+
+		return self.event, self.markix, self.marksz;
+	end,
+	
+	Lexemes = function(self)
+		return function()
+			local event, offset, size = self:GetNext();
+			if(event == PICO_EVENT_END_DOC) then
+				return nil;
+			else
+				return event, offset, size;
+			end
+		end
+	end,
+}
+luxl_mt.__index = luxl;
+
 
 return luxl

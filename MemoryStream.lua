@@ -50,6 +50,19 @@ function MemoryStream:ReadBytes(buff, count, offset)
 	return maxbytes
 end
 
+function MemoryStream:ReadString(count)
+	local pos = self.Position
+	local remaining = self.Length - pos
+
+	local maxbytes = math.min(count, remaining)
+	if maxbytes < 1 then return nil end
+
+
+	local src = ffi.cast("const uint8_t *", self.Buffer)+pos
+
+	return ffi.string(src, maxbytes)
+end
+
 
 --[[
 	Writing interface
