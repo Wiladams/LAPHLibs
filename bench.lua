@@ -36,11 +36,11 @@ local tests = {
 			repeat
 				local event, off, size = parser:GetNext()
 				if event == self.EVENT_START then
-					output(ffi.string(self.buf + off, size), ':\n')
+					output(parser:GetString(), ':\n')
 				elseif event == self.EVENT_ATTR_NAME then
-					output('  ',ffi.string(self.buf + off, size))
+					output('  ',parser:GetString())
 				elseif event == self.EVENT_ATTR_VAL then
-					output('=',ffi.string(self.buf + off, size), '\n')
+					output('=',parser:GetString(), '\n')
 				end
 			until (event == self.EVENT_END_DOC)
 		end,
@@ -92,7 +92,7 @@ local tests = {
 				if ntype == 'element' then
 					output(parser:name(), ':\n')
 					while parser:move_to_next_attribute() do
-						output(('  %s=%q\n'):format(parser:name(), parser:value()))
+						output('  ',parser:name(),'=',parser:value(),'\n')
 					end
 				end
 			end
@@ -106,7 +106,7 @@ local tests = {
 			StartElement = function(parser, element, attrs)
 				output(element, ':\n')
 				for _,name in ipairs(attrs) do
-					output(('  %s=%q\n'):format(name, attrs[name]))
+					output('  ',name,'=',attrs[name],'\n')
 				end
 			end,
 		},

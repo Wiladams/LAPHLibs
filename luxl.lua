@@ -88,6 +88,14 @@ local EVENT_END_DOC = 5;   -- End of document
 local EVENT_MARK = 6;      -- Internal only; notes position in buffer
 local EVENT_NONE = 7;      -- Internal only; should never see this event
 
+local entity_refs =  {
+  ["&lt;"] = '<',
+  ["&gt;"] = '>',
+  ["&amp;"] = '&',
+  ["&apos;"] = '\'',
+  ["&quot;"] = '"',
+}
+
 --[[
  State transition table element; contains:
  (1) current state,
@@ -208,6 +216,15 @@ end
 
 function luxl:SetMessageHandler(handler)
 	self.MsgHandler = handler;
+end
+
+function luxl:GetString()
+	local str = ffi.string(self.buf + self.markix, self.marksz)
+	-- only text and attribute value events can contain entities.
+	if self.event == EVENT_TEXT or self.event == EVENT_ATTR_VAL then
+		return str:gsub("(&%w;)", entity_refs)
+	end
+	return str
 end
 
 	--[[
