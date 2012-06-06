@@ -219,45 +219,16 @@ local cclass_match = {
 local STATES = {}
 local STATE_FUNCS = {}
 
-local next_char
-
-local function do_event(self, state, mark, i, event)
-	-- basically we are guaranteed never to have an event of
-	--   type EVENT_MARK or EVENT_NONE here.
-	self.markix = mark;
-	self.marksz = i-mark;
-	self.event = event
-	-- update state id.
-	self.state = STATE_FUNCS[state]
-	if(self.EventHandler) then
-		self.EventHandler(event, self.markix, self.marksz)
-	end
-	return event, self.markix, self.marksz
-end
-
-local function error_state(self, state_id, mark, i, c)
-	-- didn't match, default to start state
-	self.err = self.err + 1;
-	if self.ErrHandler then
-		self.state = state_id
-		self.ErrHandler(i, state_id, c);
-	end
-	-- Don't change state on error.
-	return next_char(self, STATE_FUNCS[state_id], mark)
-end
-
-function next_char(self, state, mark, i)
+local function next_char(self, state, mark, i)
 --print('-- next_char:', STATE_NAMES[STATE_FUNCS[state]], i, self.ix, mark)
 	i = i or self.ix
 	if i >= self.bufsz then
-		-- update state id.
-		self.state = STATE_FUNCS[state]
-		return EVENT_END_DOC, self.markix, self.marksz
+		return EVENT_END_DOC, 0, i, state
 	end
 	local c = band(self.buf[i], 0xff);
 	--local ctype = char_type[c];
 	self.ix = i + 1
-	--[[
+	---[[
 	if(self.MsgHandler) then
 		self.state = STATE_FUNCS[state] -- state func -> state id
 		self.MsgHandler(i, self.state, c)
@@ -276,7 +247,7 @@ local function code(...)
 	end
 end
 code[[
-local STATES, do_event, error_state, next_char, char_type = ...
+local STATES, next_char, char_type = ...
 local T_LT = string.byte('<')
 local T_SLASH = string.byte('/')
 local T_GT = string.byte('>')
@@ -308,15 +279,15 @@ for i=1,#LEXER_STATES do
 	cclasses[#cclasses + 1] = p_state
 end
 local function gen_cclass_code(prefix, cclass)
+	local next_state = STATE_NAMES[cclass.next_state]
 	if cclass.event == EVENT_MARK then
 		code(prefix, "if(mark == 0) then mark = i end -- mark the position\n")
 	elseif cclass.event ~= EVENT_NONE then
 		code(prefix, "if(mark > 0) then\n")
-		code(prefix,'  return do_event(self, ',
-			STATE_NAMES[cclass.next_state],'_f, mark, i, ',EVENT_NAMES[cclass.event],')\n')
+		code(prefix,'  return ', EVENT_NAMES[cclass.event],', mark, i, ',next_state,'_f\n')
 		code(prefix, "end\n")
 	end
-	code(prefix,'return next_char(self, ', STATE_NAMES[cclass.next_state],'_f, mark)\n')
+	code(prefix,'return next_char(self, ', next_state,'_f, mark)\n')
 end
 -- generate state functions.
 for i=0,#STATE_NAMES do
@@ -345,7 +316,8 @@ for i=0,#STATE_NAMES do
 	if has_any then
 		gen_cclass_code('  ', has_any)
 	else
-		code('  return error_state(self, ',name,', mark, i, c)\n')
+		-- exit from FSM on error.
+		code('  return nil, mark, i, ',name,'_f, c\n')
 	end
 	code('end\n')
 	-- map state id to state function
@@ -353,11 +325,9 @@ for i=0,#STATE_NAMES do
 	-- reverse map state function to state id
 	code('STATES[', name, '_f] = ', name, '\n')
 end
---io.write(fsm_code)
 -- Compile FSM code
-local state_funcs = loadstring(fsm_code, "luxl FSM code")
-state_funcs(STATE_FUNCS, do_event, error_state, next_char, char_type)
---state_funcs(STATES)
+local state_funcs = assert(loadstring(fsm_code, "luxl FSM code"))
+state_funcs(STATE_FUNCS, next_char, char_type)
 fsm_code = nil
 
 
@@ -421,7 +391,32 @@ end
 	--]]
 
 function luxl:GetNext()
-	return next_char(self, STATE_FUNCS[self.state], 0, self.ix)
+	local event, i, state_f, c
+	local mark = 0
+	repeat
+		event, mark, i, state_f, c = next_char(self, STATE_FUNCS[self.state], mark, self.ix)
+		-- update state id.
+		self.state = STATE_FUNCS[state_f]
+		if not event then
+			-- handle error
+			-- default to start state
+			self.err = self.err + 1;
+			if self.ErrHandler then
+				self.ErrHandler(i, self.state, c);
+			end
+		end
+	until event
+	-- basically we are guaranteed never to have an event of
+	--   type EVENT_MARK or EVENT_NONE here.
+	self.event = event
+	local markix = mark
+	local marksz = i-mark
+	self.markix = markix
+	self.marksz = marksz
+	if(self.EventHandler) then
+		self.EventHandler(event, markix, marksz)
+	end
+	return event, markix, marksz
 end
 	
 function luxl:Lexemes()
