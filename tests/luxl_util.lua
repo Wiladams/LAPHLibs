@@ -2,7 +2,7 @@ package.path = package.path..";..\\?.lua";
 
 local ffi = require "ffi"
 
-require "luxl"
+local luxl = require "luxl"
 require "stringzutils"
 require "strtoul"
 require "memutils"
@@ -25,7 +25,7 @@ local entity_refs =  ffi.new("const entity_t[6]", {
 })
 
 
-
+--[[
 local state_str_mapper = {
   [ST_START] ="start";
   [ST_TEXT] ="text";
@@ -48,21 +48,21 @@ function state_str(state)
 	local mapped = state_str_mapper[state] or "err"
 	return mapped
 end
+--]]
 
 
 
-
-pico_event_str_mapper = {
-  [EVENT_START] = "start tag";
-  [EVENT_END] = "end tag";
-  [EVENT_TEXT] = "text";
-  [EVENT_ATTR_NAME] = "attr name";
-  [EVENT_ATTR_VAL] = "attr val";
-  [EVENT_END_DOC] = "end document";
+luxl_event_str_mapper = {
+  [luxl.EVENT_START] = "start tag";
+  [luxl.EVENT_END] = "end tag";
+  [luxl.EVENT_TEXT] = "text";
+  [luxl.EVENT_ATTR_NAME] = "attr name";
+  [luxl.EVENT_ATTR_VAL] = "attr val";
+  [luxl.EVENT_END_DOC] = "end document";
 }
 
-function pico_event_str(event)
-	local mapped = pico_event_str_mapper[event] or "err";
+function luxl_event_str(event)
+	local mapped = luxl_event_str_mapper[event] or "err";
 	return mapped;
 end
 
@@ -141,25 +141,6 @@ GetString = function (src, offset, len)
 	return ffi.string(buf);
 end
 
---[[
-	matches text with current event text; invalid for start/end
-	document events; primarily useful in matching start tags;
-	Note: NOT case sensitive!
---]]
-
-Match = function(self, txt)
-	local match = false;
-	local len;
-
-	if(txt ~= nil) then
-		len = strlen(txt);
-		if(self.ix + len < self.bufsz) then
-			match = (0 == strncasecmp(self.buf + self.markix, txt, len));
-		end
-	end
-	return match;
-end
-
 function CreateXNode(xlex, name)
 	local currentelement = {Name = name}
 	local currentattributename = nil;
@@ -215,5 +196,5 @@ end
 
 function EventHandler(event, offset, len)
 	io.stderr:write(string.format("event fired: [%s]\n",
-	pico_event_str(event)));
+	luxl_event_str(event)));
 end

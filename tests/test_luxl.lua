@@ -50,7 +50,7 @@ function test_xml()
 	for event, offset, size in xlex:Lexemes() do
 		--print("Event: ", pico_event_str(event), offset, size);
 		local txt = GetString(buf, offset, size);
-		print(string.format("[%s] '%s'", pico_event_str(event), txt));
+		print(string.format("[%s] '%s'", luxl_event_str(event), txt));
 	end
 end
 
