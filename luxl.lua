@@ -96,6 +96,35 @@ local entity_refs =  {
   ["&quot;"] = '"',
 }
 
+-- Map constant values to constant names.
+local EVENT_NAMES = {
+	[EVENT_START] = "EVENT_START",
+	[EVENT_END] = "EVENT_END",
+	[EVENT_TEXT] = "EVENT_TEXT",
+	[EVENT_ATTR_NAME] = "EVENT_ATTR_NAME",
+	[EVENT_ATTR_VAL] = "EVENT_ATTR_VAL",
+	[EVENT_END_DOC] = "EVENT_END_DOC",
+	[EVENT_MARK] = "EVENT_MARK",
+	[EVENT_NONE] = "EVENT_NONE",
+}
+local STATE_NAMES = {
+	[ST_START] = "ST_START",
+	[ST_TEXT] = "ST_TEXT",
+	[ST_START_TAG] = "ST_START_TAG",
+	[ST_START_TAGNAME] = "ST_START_TAGNAME",
+	[ST_START_TAGNAME_END] = "ST_START_TAGNAME_END",
+	[ST_END_TAG] = "ST_END_TAG",
+	[ST_END_TAGNAME] = "ST_END_TAGNAME",
+	[ST_END_TAGNAME_END] = "ST_END_TAGNAME_END",
+	[ST_EMPTY_TAG] = "ST_EMPTY_TAG",
+	[ST_SPACE] = "ST_SPACE",
+	[ST_ATTR_NAME] = "ST_ATTR_NAME",
+	[ST_ATTR_NAME_END] = "ST_ATTR_NAME_END",
+	[ST_ATTR_VAL] = "ST_ATTR_VAL",
+	[ST_ATTR_VAL2] = "ST_ATTR_VAL2",
+	[ST_ERROR] = "ST_ERROR",
+}
+
 --[[
  State transition table element; contains:
  (1) current state,
@@ -176,12 +205,6 @@ local LEXER_STATES = {
   { state = ST_ERROR,         cclass = CCLASS_NONE,         next_state = ST_ERROR,             event = EVENT_NONE }
 };
 
-local T_LT = string.byte('<')
-local T_SLASH = string.byte('/')
-local T_GT = string.byte('>')
-local T_EQ = string.byte('=')
-local T_QUOTE = string.byte('"')
-
 local cclass_match = {
 [CCLASS_LETTERS] = "(ctype == 1 or ctype == 2)",
 [CCLASS_LEFT_ANGLE] = "(c == T_LT)",
@@ -194,6 +217,31 @@ local cclass_match = {
 }
 
 local STATES = {}
+local fsm_code = ''
+local function code(...)
+	for i=1,select("#", ...) do
+		fsm_code = fsm_code .. tostring(select(i, ...))
+	end
+end
+code[[
+local STATES = ...
+local T_LT = string.byte('<')
+local T_SLASH = string.byte('/')
+local T_GT = string.byte('>')
+local T_EQ = string.byte('=')
+local T_QUOTE = string.byte('"')
+]]
+-- define EVENT_ constants for generated code.
+for i=0,#EVENT_NAMES do
+	code('local ', EVENT_NAMES[i], ' = ', i, '\n')
+end
+-- pre-define locals for state functions.
+for i=0,#STATE_NAMES do
+	local name = STATE_NAMES[i]
+	code('local ', name, ' = ', i, '\n')
+	code('local ', name, '_f\n')
+end
+-- group LEXER states.
 for i=1,#LEXER_STATES do
 	local p_state = LEXER_STATES[i]
 	local state = STATES[p_state.state]
@@ -207,6 +255,50 @@ for i=1,#LEXER_STATES do
 	end
 	cclasses[#cclasses + 1] = p_state
 end
+local function gen_cclass_return(prefix, cclass)
+	code(prefix,'return ', STATE_NAMES[cclass.next_state],'_f, ',EVENT_NAMES[cclass.event],'\n')
+end
+-- generate state functions.
+for i=0,#STATE_NAMES do
+	local name = STATE_NAMES[i]
+	local state = STATES[i]
+	local cclasses = state.cclasses
+	code('function ', name, '_f(c, ctype)\n')
+	local has_any
+	for i=1,#cclasses do
+		local cclass = cclasses[i]
+		local id = cclass.cclass
+		local condition = cclass_match[id]
+		if id == CCLASS_ANY then
+			has_any = cclass
+		elseif i == 1 then
+			code('  if ', condition, ' then\n')
+			gen_cclass_return('    ', cclass)
+		else
+			code('  elseif ', condition, ' then\n')
+			gen_cclass_return('    ', cclass)
+		end
+	end
+	code('  end\n')
+	-- catch-all for cclass_any or goto error state.
+	if has_any then
+		gen_cclass_return('  ', has_any)
+	else
+		code('  return nil, nil\n')
+	end
+	code('end\n')
+	-- map state id to state function
+	code('STATES[', name, '] = ', name, '_f\n')
+	-- reverse map state function to state id
+	code('STATES[', name, '_f] = ', name, '\n')
+end
+--io.write(fsm_code)
+-- Compile FSM code
+local state_funcs = loadstring(fsm_code, "luxl FSM code")
+local STATE_FUNCS = {}
+state_funcs(STATE_FUNCS)
+--state_funcs(STATES)
+fsm_code = nil
 
 
 local luxl = {
@@ -278,75 +370,54 @@ function luxl:GetNext()
 	local fired=false;
 	local mark=0;
 
+	local state = STATE_FUNCS[self.state]
+
 	while (i < self.bufsz and not fired) do
 		c = band(self.buf[i], 0xff);
 		ctype = char_type[c];
 		self.ix = self.ix + 1;
 		if(self.MsgHandler) then
+			self.state = STATE_FUNCS[state] -- state func -> state id
 			self.MsgHandler(i, self.state, c)
 		end
 
-		local state = STATES[self.state]
-		local cclasses = state.cclasses
-		local match = false;
-		for j=1,#cclasses do
-			local cclass = cclasses[j]
-			if cclass.cclass == CCLASS_LETTERS then
-				match = (ctype == 1 or ctype == 2);
-			elseif cclass.cclass == CCLASS_LEFT_ANGLE then
-				match = (c == T_LT);
-			elseif cclass.cclass ==  CCLASS_SLASH then
-				match = (c == T_SLASH);
-			elseif cclass.cclass == CCLASS_RIGHT_ANGLE then
-				match = (c == T_GT);
-			elseif cclass.cclass == CCLASS_EQUALS then
-				match = (c == T_EQ);
-			elseif cclass.cclass == CCLASS_QUOTE then
-				match = (c == T_QUOTE);
-			elseif cclass.cclass == CCLASS_SPACE then
-				match = (ctype == 3);
-			elseif cclass.cclass == CCLASS_ANY then
-				match = true;
-			end
-
-
-
-			if(match) then
-				-- we matched a character class
-				if(cclass.event == EVENT_MARK) then
-					if(mark == 0) then
-						mark = i;
-					end -- mark the position
-				elseif(cclass.event ~= EVENT_NONE) then
-					if(mark > 0) then
-						-- basically we are guaranteed never to have an event of
-						--   type EVENT_MARK or EVENT_NONE here.
-						self.markix = mark;
-						self.marksz = i-mark;
-						self.event = cclass.event;
-						fired = true;
-						if(self.EventHandler) then
-							self.EventHandler(self.event, self.markix, self.marksz)
-						end
+		-- run state function to find next state.
+		local next_state, event = state(c, ctype)
+		if(next_state) then
+			state = next_state
+			-- we matched a character class
+			if(event == EVENT_MARK) then
+				if(mark == 0) then
+					mark = i;
+				end -- mark the position
+			elseif(event ~= EVENT_NONE) then
+				if(mark > 0) then
+					-- basically we are guaranteed never to have an event of
+					--   type EVENT_MARK or EVENT_NONE here.
+					self.markix = mark;
+					self.marksz = i-mark;
+					self.event = event;
+					fired = true;
+					if(self.EventHandler) then
+						self.EventHandler(event, self.markix, self.marksz)
 					end
 				end
-
-				self.state = cclass.next_state; -- change state
-				break; -- break out of loop though state search
 			end
-		end
-
-		if(match==0) then
+		else
 			-- didn't match, default to start state
 			self.err = self.err + 1;
 			if self.ErrHandler then
+				self.state = STATE_FUNCS[state] -- state func -> state id
 				self.ErrHandler(i, self.state, c);
 			end
-			self.state = ST_START;
+			-- Don't change state on error.
+			--state = STATE_FUNCS[ST_START]
 		end
 		i = i + 1
 	end
 
+	-- update state id.
+	self.state = STATE_FUNCS[state]
 	if(not fired) then
 		self.event = EVENT_END_DOC;
 	end
