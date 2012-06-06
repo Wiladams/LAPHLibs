@@ -217,6 +217,58 @@ local cclass_match = {
 }
 
 local STATES = {}
+local STATE_FUNCS = {}
+
+local next_char
+
+local function do_event(self, state, mark, i, event)
+	-- basically we are guaranteed never to have an event of
+	--   type EVENT_MARK or EVENT_NONE here.
+	self.markix = mark;
+	self.marksz = i-mark;
+	self.event = event
+	-- update state id.
+	self.state = STATE_FUNCS[state]
+	if(self.EventHandler) then
+		self.EventHandler(event, self.markix, self.marksz)
+	end
+	return event, self.markix, self.marksz
+end
+
+local function error_state(self, state_id, mark, i, c)
+	-- didn't match, default to start state
+	self.err = self.err + 1;
+	if self.ErrHandler then
+		self.state = state_id
+		self.ErrHandler(i, state_id, c);
+	end
+	-- Don't change state on error.
+	return next_char(self, STATE_FUNCS[state_id], mark)
+end
+
+function next_char(self, state, mark, i)
+--print('-- next_char:', STATE_NAMES[STATE_FUNCS[state]], i, self.ix, mark)
+	i = i or self.ix
+	if i >= self.bufsz then
+		-- update state id.
+		self.state = STATE_FUNCS[state]
+		return EVENT_END_DOC, self.markix, self.marksz
+	end
+	local c = band(self.buf[i], 0xff);
+	--local ctype = char_type[c];
+	self.ix = i + 1
+	--[[
+	if(self.MsgHandler) then
+		self.state = STATE_FUNCS[state] -- state func -> state id
+		self.MsgHandler(i, self.state, c)
+	end
+	--]]
+
+	-- run state function to find next state.
+	return state(self, mark, i, c)
+end
+
+
 local fsm_code = ''
 local function code(...)
 	for i=1,select("#", ...) do
@@ -224,7 +276,7 @@ local function code(...)
 	end
 end
 code[[
-local STATES = ...
+local STATES, do_event, error_state, next_char, char_type = ...
 local T_LT = string.byte('<')
 local T_SLASH = string.byte('/')
 local T_GT = string.byte('>')
@@ -255,15 +307,24 @@ for i=1,#LEXER_STATES do
 	end
 	cclasses[#cclasses + 1] = p_state
 end
-local function gen_cclass_return(prefix, cclass)
-	code(prefix,'return ', STATE_NAMES[cclass.next_state],'_f, ',EVENT_NAMES[cclass.event],'\n')
+local function gen_cclass_code(prefix, cclass)
+	if cclass.event == EVENT_MARK then
+		code(prefix, "if(mark == 0) then mark = i end -- mark the position\n")
+	elseif cclass.event ~= EVENT_NONE then
+		code(prefix, "if(mark > 0) then\n")
+		code(prefix,'  return do_event(self, ',
+			STATE_NAMES[cclass.next_state],'_f, mark, i, ',EVENT_NAMES[cclass.event],')\n')
+		code(prefix, "end\n")
+	end
+	code(prefix,'return next_char(self, ', STATE_NAMES[cclass.next_state],'_f, mark)\n')
 end
 -- generate state functions.
 for i=0,#STATE_NAMES do
 	local name = STATE_NAMES[i]
 	local state = STATES[i]
 	local cclasses = state.cclasses
-	code('function ', name, '_f(c, ctype)\n')
+	code('function ', name, '_f(self, mark, i, c)\n')
+	code('  local ctype = char_type[c]\n')
 	local has_any
 	for i=1,#cclasses do
 		local cclass = cclasses[i]
@@ -273,18 +334,18 @@ for i=0,#STATE_NAMES do
 			has_any = cclass
 		elseif i == 1 then
 			code('  if ', condition, ' then\n')
-			gen_cclass_return('    ', cclass)
+			gen_cclass_code('    ', cclass)
 		else
 			code('  elseif ', condition, ' then\n')
-			gen_cclass_return('    ', cclass)
+			gen_cclass_code('    ', cclass)
 		end
 	end
 	code('  end\n')
 	-- catch-all for cclass_any or goto error state.
 	if has_any then
-		gen_cclass_return('  ', has_any)
+		gen_cclass_code('  ', has_any)
 	else
-		code('  return nil, nil\n')
+		code('  return error_state(self, ',name,', mark, i, c)\n')
 	end
 	code('end\n')
 	-- map state id to state function
@@ -295,8 +356,7 @@ end
 --io.write(fsm_code)
 -- Compile FSM code
 local state_funcs = loadstring(fsm_code, "luxl FSM code")
-local STATE_FUNCS = {}
-state_funcs(STATE_FUNCS)
+state_funcs(STATE_FUNCS, do_event, error_state, next_char, char_type)
 --state_funcs(STATES)
 fsm_code = nil
 
@@ -361,68 +421,7 @@ end
 	--]]
 
 function luxl:GetNext()
-	local j;
-	local c;
-	local ctype;
-
-
-	local i = self.ix;
-	local fired=false;
-	local mark=0;
-
-	local state = STATE_FUNCS[self.state]
-
-	while (i < self.bufsz and not fired) do
-		c = band(self.buf[i], 0xff);
-		ctype = char_type[c];
-		self.ix = self.ix + 1;
-		if(self.MsgHandler) then
-			self.state = STATE_FUNCS[state] -- state func -> state id
-			self.MsgHandler(i, self.state, c)
-		end
-
-		-- run state function to find next state.
-		local next_state, event = state(c, ctype)
-		if(next_state) then
-			state = next_state
-			-- we matched a character class
-			if(event == EVENT_MARK) then
-				if(mark == 0) then
-					mark = i;
-				end -- mark the position
-			elseif(event ~= EVENT_NONE) then
-				if(mark > 0) then
-					-- basically we are guaranteed never to have an event of
-					--   type EVENT_MARK or EVENT_NONE here.
-					self.markix = mark;
-					self.marksz = i-mark;
-					self.event = event;
-					fired = true;
-					if(self.EventHandler) then
-						self.EventHandler(event, self.markix, self.marksz)
-					end
-				end
-			end
-		else
-			-- didn't match, default to start state
-			self.err = self.err + 1;
-			if self.ErrHandler then
-				self.state = STATE_FUNCS[state] -- state func -> state id
-				self.ErrHandler(i, self.state, c);
-			end
-			-- Don't change state on error.
-			--state = STATE_FUNCS[ST_START]
-		end
-		i = i + 1
-	end
-
-	-- update state id.
-	self.state = STATE_FUNCS[state]
-	if(not fired) then
-		self.event = EVENT_END_DOC;
-	end
-
-	return self.event, self.markix, self.marksz;
+	return next_char(self, STATE_FUNCS[self.state], 0, self.ix)
 end
 	
 function luxl:Lexemes()
