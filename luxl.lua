@@ -205,6 +205,17 @@ local LEXER_STATES = {
   { state = ST_ERROR,         cclass = CCLASS_NONE,         next_state = ST_ERROR,             event = EVENT_NONE }
 };
 
+ffi.cdef[[
+struct parse_state {
+  const char* buf;      /* reference to buffer */
+  int bufsz;            /* size of buf */
+	int mark;
+	int i;
+  int ix;               /* index into buffer */
+};
+
+]]
+
 local cclass_match = {
 [CCLASS_LETTERS] = "(ctype == 1 or ctype == 2)",
 [CCLASS_LEFT_ANGLE] = "(c == T_LT)",
@@ -219,24 +230,20 @@ local cclass_match = {
 local STATES = {}
 local STATE_FUNCS = {}
 
-local function next_char(self, state, mark, i)
---print('-- next_char:', STATE_NAMES[STATE_FUNCS[state]], i, self.ix, mark)
-	i = i or self.ix
-	if i >= self.bufsz then
+local function next_char(ps, state, verbose)
+	local i = ps.ix
+	if i >= ps.bufsz then
 		return EVENT_END_DOC, 0, i, state
 	end
-	local c = band(self.buf[i], 0xff);
-	--local ctype = char_type[c];
-	self.ix = i + 1
-	---[[
-	if(self.MsgHandler) then
-		self.state = STATE_FUNCS[state] -- state func -> state id
-		self.MsgHandler(i, self.state, c)
+	ps.i = i
+	local c = band(ps.buf[i], 0xff);
+	ps.ix = i + 1
+	if verbose then
+		verbose(i, STATE_FUNCS[state], c)
 	end
-	--]]
 
 	-- run state function to find next state.
-	return state(self, mark, i, c)
+	return state(ps, c, verbose)
 end
 
 
@@ -281,20 +288,20 @@ end
 local function gen_cclass_code(prefix, cclass)
 	local next_state = STATE_NAMES[cclass.next_state]
 	if cclass.event == EVENT_MARK then
-		code(prefix, "if(mark == 0) then mark = i end -- mark the position\n")
+		code(prefix, "if(ps.mark == 0) then ps.mark = ps.i end -- mark the position\n")
 	elseif cclass.event ~= EVENT_NONE then
-		code(prefix, "if(mark > 0) then\n")
-		code(prefix,'  return ', EVENT_NAMES[cclass.event],', mark, i, ',next_state,'_f\n')
+		code(prefix, "if(ps.mark > 0) then\n")
+		code(prefix,'  return ', EVENT_NAMES[cclass.event],', ',next_state,'_f\n')
 		code(prefix, "end\n")
 	end
-	code(prefix,'return next_char(self, ', next_state,'_f, mark)\n')
+	code(prefix,'return next_char(ps, ', next_state,'_f, verbose)\n')
 end
 -- generate state functions.
 for i=0,#STATE_NAMES do
 	local name = STATE_NAMES[i]
 	local state = STATES[i]
 	local cclasses = state.cclasses
-	code('function ', name, '_f(self, mark, i, c)\n')
+	code('function ', name, '_f(ps, c, verbose)\n')
 	code('  local ctype = char_type[c]\n')
 	local has_any
 	for i=1,#cclasses do
@@ -317,7 +324,7 @@ for i=0,#STATE_NAMES do
 		gen_cclass_code('  ', has_any)
 	else
 		-- exit from FSM on error.
-		code('  return nil, mark, i, ',name,'_f, c\n')
+		code('  return nil, ',name,'_f, c\n')
 	end
 	code('end\n')
 	-- map state id to state function
@@ -349,13 +356,19 @@ function luxl.new(buffer, bufflen)
 		bufsz = bufflen;		-- size of input buffer
 		state = ST_START;		-- current state
 		event = EVENT_NONE;		-- current event
-		ix = 0;					-- current index we're reading from
 		err = 0;				-- number of errors thus far
 		markix = 0;				-- offset of current item of interest
 		marksz = 0;				-- size of current item of interest
 		MsgHandler = nil;		-- Routine to handle messages
 		ErrHandler = nil;		-- Routine to call when there's an error
 		EventHandler = nil;
+		ps = ffi.new('struct parse_state', {
+			buf = buffer,
+			bufsz = bufflen,
+			mark = 0,
+			i = 0,
+			ix = 0,
+		}),
 	}
 	setmetatable(newone, luxl_mt);
 
@@ -391,10 +404,12 @@ end
 	--]]
 
 function luxl:GetNext()
-	local event, i, state_f, c
-	local mark = 0
+	local event, state_f, c
+	local ps = self.ps
+	ps.mark = 0
+	state_f = STATE_FUNCS[self.state]
 	repeat
-		event, mark, i, state_f, c = next_char(self, STATE_FUNCS[self.state], mark, self.ix)
+		event, state_f, c = next_char(ps, state_f, self.MsgHandler)
 		-- update state id.
 		self.state = STATE_FUNCS[state_f]
 		if not event then
@@ -402,15 +417,15 @@ function luxl:GetNext()
 			-- default to start state
 			self.err = self.err + 1;
 			if self.ErrHandler then
-				self.ErrHandler(i, self.state, c);
+				self.ErrHandler(ps.i, self.state, c);
 			end
 		end
 	until event
 	-- basically we are guaranteed never to have an event of
 	--   type EVENT_MARK or EVENT_NONE here.
 	self.event = event
-	local markix = mark
-	local marksz = i-mark
+	local markix = ps.mark
+	local marksz = ps.i-ps.mark
 	self.markix = markix
 	self.marksz = marksz
 	if(self.EventHandler) then
