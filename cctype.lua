@@ -44,6 +44,10 @@ function isascii(c)
 	return (c >= 0) and (c <= 0x7f)
 end
 
+function isbyte(n)
+	return band(n,0xff) == n
+end
+
 function iscntrl(c)
 	return (c >= 0 and c < 0x20) or (c == 0x7f)
 end
@@ -94,16 +98,17 @@ return {
 	isalnum = isalnum,
 	isalpha = isalpha,
 	isascii = isascii,
+	isbyte	= isbyte,
 	iscntrl = iscntrl,
 	isdigit = isdigit,
 	isgraph = isgraph,
 	islower = islower,
 	isprint = isprint,
-	ispunct = ispunct, 
+	ispunct = ispunct,
 	isspace = isspace,
 	isupper = isupper,
 	isxdigit = isxdigit,
-	
+
 	tolower = tolower,
 	toupper = toupper,
 }

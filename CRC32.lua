@@ -7,7 +7,7 @@ local bxor = bit.bxor
 local rshift = bit.rshift
 local lshift = bit.lshift
 
-CRC32_consts = ffi.new("uint32_t[256]",{
+local CRC32_consts = ffi.new("uint32_t[256]",{
 	0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
 	0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
 	0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988,
@@ -91,7 +91,7 @@ CRC32_consts = ffi.new("uint32_t[256]",{
 
 -- Calculate a CRC for any buffer
 -- This one is the most general purpose
-function CRC32l(src, len, offset)
+local function CRC32l(src, len, offset)
 	offset = offset or 0
 	local crc = 0xFFFFFFFF;
 	local p = ffi.cast("const uint8_t *", src)
@@ -105,7 +105,7 @@ function CRC32l(src, len, offset)
 end
 
 -- Calculate a CRC32 for a null terminated string
-function CRC32z(s)
+local function CRC32z(s)
 	local crc = 0xFFFFFFFF;
 	local p = ffi.cast("const uint8_t *", s)
 	local i = 0
@@ -118,7 +118,7 @@ function CRC32z(s)
 	return bxor(crc, -1)
 end
 
-function CRC32(src)
+local function CRC32(src)
 	if type(src) == "string" then
 		return CRC32l(src, #src)
 	end
@@ -128,11 +128,9 @@ function CRC32(src)
 	end
 end
 
---[[
-local str1 = "Test vector from febooti.com";
-local str2 = "123456789"
 
-print(string.format("0x%08x",CRC32(str1)));
-print(string.format("0x%08x",CRC32(str2)));
 
---]]
+return {
+	CRC32 = CRC32,
+	CRC32l = CRC32l,
+}

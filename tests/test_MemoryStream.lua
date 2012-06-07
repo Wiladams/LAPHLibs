@@ -1,6 +1,6 @@
 package.path = package.path..";..\\?.lua";
 
-require "MemoryStream"
+MemoryStream = require "MemoryStream"
 
 
 function printStreamState(stream)

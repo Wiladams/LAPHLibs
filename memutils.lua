@@ -9,7 +9,6 @@ local lshift = bit.lshift
 	binary functions
 
 	ARRAY_SIZE
-	isbyte
 	bzero
 	bcopy
 	bcmp
@@ -26,9 +25,7 @@ function ARRAY_SIZE(array)
 	return tonumber(nelem)
 end
 
-function isbyte(n)
-	return band(n,0xff) == n
-end
+
 
 function bzero(dest, nbytes)
 	ffi.fill(dest, nbytes)
@@ -47,14 +44,7 @@ function bcmp(ptr1, ptr2, nbytes)
 	return 0
 end
 
---[[
-	Memory functions
 
-	memchr(const void *buf, int val, size_t maxCount);
-	memcmp(const void *buf1, const void *buf2, size_t size);
-	memcpy_s(void *dst, int dstSize, const void *src, size_t maxCount)
-	memset(void * dst, int val, size_t size)
---]]
 
 function memset(dest, c, len)
 	ffi.fill(dest, len, c)
@@ -105,3 +95,16 @@ function memmove(dst, src, num)
 	end
 	return dst
 end
+
+return {
+	ARRAY_SIZE = ARRAY_SIZE,
+	bcmp = bcmp,
+	bcopy = bcopy,
+	bzero = bzero,
+
+	memchr = memchr,
+	memcpy = memcpy,
+	memcmp = memcmp,
+	memmove = memmove,
+	memset = memset,
+}

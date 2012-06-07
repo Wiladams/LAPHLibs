@@ -3,8 +3,8 @@ local ffi = require "ffi"
 require "stream"
 
 
-MemoryStream = {}
-MemoryStream_mt = {
+local MemoryStream = {}
+local MemoryStream_mt = {
 	__index = MemoryStream;
 }
 
@@ -128,3 +128,5 @@ function MemoryStream:Seek(pos, origin)
 
 	return self.Position
 end
+
+return MemoryStream;

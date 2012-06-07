@@ -1,7 +1,7 @@
 package.path = package.path..";..\\?.lua";
 
 local ffi = require "ffi"
-require "memutils"
+local mutils = require "memutils"
 require "stringzutils"
 
 local str1 = strdup("william")

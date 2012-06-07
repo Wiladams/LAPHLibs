@@ -128,6 +128,17 @@ function test_clearbit()
 end
 
 
+function test_swap()
+	local StreamIsBe = false
+	local hostle = ffi.abi("le")
+
+	local needswap = StreamIsBe == hostle
+
+	print("stream BE: false  hostle: true", false == true);
+	print("stream BE: false  hostle: false", false == false);
+	print("stream BE: true  hostle: true", true == true);
+	print("stream BE: true  hostle: false", true == false);
+end
 
 --test_booleanstring()
 --test_stringtonumber()
@@ -138,4 +149,6 @@ end
 --test_bitsfrombytes();
 
 
-test_clearbit()
+--test_clearbit()
+
+test_swap();
