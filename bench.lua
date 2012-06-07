@@ -29,8 +29,12 @@ local tests = {
 			-- need to cache buffer for extracting values.
 			self.buf = buf
 			self.len = len
-			-- can't re-use old parser, make a new one each time.
-			return self.luxl.new(buf, len)
+			if old_parser then
+				old_parser:Reset(buf, len)
+				return old_parser
+			else
+				return self.luxl.new(buf, len)
+			end
 		end,
 		parse = function(self, parser, data)
 			repeat

@@ -375,6 +375,21 @@ function luxl.new(buffer, bufflen)
 	return newone;
 end
 
+function luxl:Reset(buffer, bufflen)
+	self.buf = buffer			-- pointer to "uint8_t *" buffer (0 based)
+	self.bufsz = bufflen		-- size of input buffer
+	self.state = ST_START		-- current state
+	self.event = EVENT_NONE		-- current event
+	self.err = 0				-- number of errors thus far
+	self.markix = 0				-- offset of current item of interest
+	self.marksz = 0				-- size of current item of interest
+	local ps = self.ps
+	ps.buf = buffer
+	ps.bufsz = bufflen
+	ps.mark = 0
+	ps.i = 0
+	ps.ix = 0
+end
 
 function luxl:SetMessageHandler(handler)
 	self.MsgHandler = handler;
