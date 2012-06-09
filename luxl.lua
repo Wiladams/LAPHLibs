@@ -97,16 +97,6 @@ local entity_refs =  {
 }
 
 -- Map constant values to constant names.
-local EVENT_NAMES = {
-	[EVENT_START] = "EVENT_START",
-	[EVENT_END] = "EVENT_END",
-	[EVENT_TEXT] = "EVENT_TEXT",
-	[EVENT_ATTR_NAME] = "EVENT_ATTR_NAME",
-	[EVENT_ATTR_VAL] = "EVENT_ATTR_VAL",
-	[EVENT_END_DOC] = "EVENT_END_DOC",
-	[EVENT_MARK] = "EVENT_MARK",
-	[EVENT_NONE] = "EVENT_NONE",
-}
 local STATE_NAMES = {
 	[ST_START] = "ST_START",
 	[ST_TEXT] = "ST_TEXT",
@@ -255,20 +245,17 @@ local function code(...)
 end
 code[[
 local STATES, next_char, char_type = ...
+
 local T_LT = string.byte('<')
 local T_SLASH = string.byte('/')
 local T_GT = string.byte('>')
 local T_EQ = string.byte('=')
 local T_QUOTE = string.byte('"')
+
 ]]
--- define EVENT_ constants for generated code.
-for i=0,#EVENT_NAMES do
-	code('local ', EVENT_NAMES[i], ' = ', i, '\n')
-end
 -- pre-define locals for state functions.
 for i=0,#STATE_NAMES do
 	local name = STATE_NAMES[i]
-	code('local ', name, ' = ', i, '\n')
 	code('local ', name, '_f\n')
 end
 -- group LEXER states.
@@ -291,7 +278,7 @@ local function gen_cclass_code(prefix, cclass)
 		code(prefix, "if(ps.mark == 0) then ps.mark = ps.i end -- mark the position\n")
 	elseif cclass.event ~= EVENT_NONE then
 		code(prefix, "if(ps.mark > 0) then\n")
-		code(prefix,'  return ', EVENT_NAMES[cclass.event],', ',next_state,'_f\n')
+		code(prefix,'  return ', cclass.event,', ',next_state,'_f\n')
 		code(prefix, "end\n")
 	end
 	code(prefix,'return next_char(ps, ', next_state,'_f, verbose)\n')
@@ -328,9 +315,9 @@ for i=0,#STATE_NAMES do
 	end
 	code('end\n')
 	-- map state id to state function
-	code('STATES[', name, '] = ', name, '_f\n')
+	code('STATES[', i, '] = ', name, '_f\n')
 	-- reverse map state function to state id
-	code('STATES[', name, '_f] = ', name, '\n')
+	code('STATES[', name, '_f] = ', i, '\n')
 end
 -- Compile FSM code
 local state_funcs = assert(loadstring(fsm_code, "luxl FSM code"))
