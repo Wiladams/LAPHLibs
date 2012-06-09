@@ -88,6 +88,33 @@ local EVENT_END_DOC = 5;   -- End of document
 local EVENT_MARK = 6;      -- Internal only; notes position in buffer
 local EVENT_NONE = 7;      -- Internal only; should never see this event
 
+local entity_refs =  {
+  ["&lt;"] = '<',
+  ["&gt;"] = '>',
+  ["&amp;"] = '&',
+  ["&apos;"] = '\'',
+  ["&quot;"] = '"',
+}
+
+-- Map constant values to constant names.
+local STATE_NAMES = {
+	[ST_START] = "ST_START",
+	[ST_TEXT] = "ST_TEXT",
+	[ST_START_TAG] = "ST_START_TAG",
+	[ST_START_TAGNAME] = "ST_START_TAGNAME",
+	[ST_START_TAGNAME_END] = "ST_START_TAGNAME_END",
+	[ST_END_TAG] = "ST_END_TAG",
+	[ST_END_TAGNAME] = "ST_END_TAGNAME",
+	[ST_END_TAGNAME_END] = "ST_END_TAGNAME_END",
+	[ST_EMPTY_TAG] = "ST_EMPTY_TAG",
+	[ST_SPACE] = "ST_SPACE",
+	[ST_ATTR_NAME] = "ST_ATTR_NAME",
+	[ST_ATTR_NAME_END] = "ST_ATTR_NAME_END",
+	[ST_ATTR_VAL] = "ST_ATTR_VAL",
+	[ST_ATTR_VAL2] = "ST_ATTR_VAL2",
+	[ST_ERROR] = "ST_ERROR",
+}
+
 --[[
  State transition table element; contains:
  (1) current state,
@@ -168,13 +195,136 @@ local LEXER_STATES = {
   { state = ST_ERROR,         cclass = CCLASS_NONE,         next_state = ST_ERROR,             event = EVENT_NONE }
 };
 
+ffi.cdef[[
+struct parse_state {
+  const char* buf;      /* reference to buffer */
+  int bufsz;            /* size of buf */
+	int mark;
+	int i;
+  int ix;               /* index into buffer */
+};
+
+]]
+
+local cclass_match = {
+[CCLASS_LETTERS] = "(ctype == 1 or ctype == 2)",
+[CCLASS_LEFT_ANGLE] = "(c == T_LT)",
+[CCLASS_SLASH] = "(c == T_SLASH)",
+[CCLASS_RIGHT_ANGLE] = "(c == T_GT)",
+[CCLASS_EQUALS] = "(c == T_EQ)",
+[CCLASS_QUOTE] = "(c == T_QUOTE)",
+[CCLASS_SPACE] = "(ctype == 3)",
+[CCLASS_ANY] = "true",
+}
+
+local STATES = {}
+local STATE_FUNCS = {}
+
+local function next_char(ps, state, verbose)
+	local i = ps.ix
+	if i >= ps.bufsz then
+		return EVENT_END_DOC, 0, i, state
+	end
+	ps.i = i
+	local c = band(ps.buf[i], 0xff);
+	ps.ix = i + 1
+	if verbose then
+		verbose(i, STATE_FUNCS[state], c)
+	end
+
+	-- run state function to find next state.
+	return state(ps, c, verbose)
+end
+
+
+local fsm_code = ''
+local function code(...)
+	for i=1,select("#", ...) do
+		fsm_code = fsm_code .. tostring(select(i, ...))
+	end
+end
+code[[
+local STATES, next_char, char_type = ...
+
 local T_LT = string.byte('<')
 local T_SLASH = string.byte('/')
 local T_GT = string.byte('>')
 local T_EQ = string.byte('=')
 local T_QUOTE = string.byte('"')
 
-local luxl_mt = {}
+]]
+-- pre-define locals for state functions.
+for i=0,#STATE_NAMES do
+	local name = STATE_NAMES[i]
+	code('local ', name, '_f\n')
+end
+-- group LEXER states.
+for i=1,#LEXER_STATES do
+	local p_state = LEXER_STATES[i]
+	local state = STATES[p_state.state]
+	local cclasses
+	if not state then
+		cclasses = {}
+		state = { state = p_state.state, cclasses = cclasses }
+		STATES[p_state.state] = state
+	else
+		cclasses = state.cclasses
+	end
+	cclasses[#cclasses + 1] = p_state
+end
+local function gen_cclass_code(prefix, cclass)
+	local next_state = STATE_NAMES[cclass.next_state]
+	if cclass.event == EVENT_MARK then
+		code(prefix, "if(ps.mark == 0) then ps.mark = ps.i end -- mark the position\n")
+	elseif cclass.event ~= EVENT_NONE then
+		code(prefix, "if(ps.mark > 0) then\n")
+		code(prefix,'  return ', cclass.event,', ',next_state,'_f\n')
+		code(prefix, "end\n")
+	end
+	code(prefix,'return next_char(ps, ', next_state,'_f, verbose)\n')
+end
+-- generate state functions.
+for i=0,#STATE_NAMES do
+	local name = STATE_NAMES[i]
+	local state = STATES[i]
+	local cclasses = state.cclasses
+	code('function ', name, '_f(ps, c, verbose)\n')
+	code('  local ctype = char_type[c]\n')
+	local has_any
+	for i=1,#cclasses do
+		local cclass = cclasses[i]
+		local id = cclass.cclass
+		local condition = cclass_match[id]
+		if id == CCLASS_ANY then
+			has_any = cclass
+		elseif i == 1 then
+			code('  if ', condition, ' then\n')
+			gen_cclass_code('    ', cclass)
+		else
+			code('  elseif ', condition, ' then\n')
+			gen_cclass_code('    ', cclass)
+		end
+	end
+	code('  end\n')
+	-- catch-all for cclass_any or goto error state.
+	if has_any then
+		gen_cclass_code('  ', has_any)
+	else
+		-- exit from FSM on error.
+		code('  return nil, ',name,'_f, c\n')
+	end
+	code('end\n')
+	-- map state id to state function
+	code('STATES[', i, '] = ', name, '_f\n')
+	-- reverse map state function to state id
+	code('STATES[', name, '_f] = ', i, '\n')
+end
+-- Compile FSM code
+local state_funcs = assert(loadstring(fsm_code, "luxl FSM code"))
+state_funcs(STATE_FUNCS, next_char, char_type)
+fsm_code = nil
+
+
 local luxl = {
 	EVENT_START = EVENT_START; 	 -- Start tag
 	EVENT_END = EVENT_END;       -- End tag
@@ -184,31 +334,63 @@ local luxl = {
 	EVENT_END_DOC = EVENT_END_DOC;   -- End of document
 	EVENT_MARK = EVENT_MARK;      -- Internal only; notes position in buffer
 	EVENT_NONE = EVENT_NONE;      -- Internal only; should never see this event
+}
+local luxl_mt = { __index = luxl }
 
-
-	new = function(buffer, bufflen)
-		local obj = {
+function luxl.new(buffer, bufflen)
+	local newone = {
 		buf = buffer;			-- pointer to "uint8_t *" buffer (0 based)
 		bufsz = bufflen;		-- size of input buffer
 		state = ST_START;		-- current state
 		event = EVENT_NONE;		-- current event
-		ix = 0;					-- current index we're reading from
 		err = 0;				-- number of errors thus far
 		markix = 0;				-- offset of current item of interest
 		marksz = 0;				-- size of current item of interest
 		MsgHandler = nil;		-- Routine to handle messages
 		ErrHandler = nil;		-- Routine to call when there's an error
 		EventHandler = nil;
-		}
-		setmetatable(obj, luxl_mt);
+		ps = ffi.new('struct parse_state', {
+			buf = buffer,
+			bufsz = bufflen,
+			mark = 0,
+			i = 0,
+			ix = 0,
+		}),
+	}
+	setmetatable(newone, luxl_mt);
 
-		return obj;
-		end,
-		
-	SetMessageHandler = function(self, handler)
-		self.MsgHandler = handler;
-	end,
-	
+	return newone;
+end
+
+function luxl:Reset(buffer, bufflen)
+	self.buf = buffer			-- pointer to "uint8_t *" buffer (0 based)
+	self.bufsz = bufflen		-- size of input buffer
+	self.state = ST_START		-- current state
+	self.event = EVENT_NONE		-- current event
+	self.err = 0				-- number of errors thus far
+	self.markix = 0				-- offset of current item of interest
+	self.marksz = 0				-- size of current item of interest
+	local ps = self.ps
+	ps.buf = buffer
+	ps.bufsz = bufflen
+	ps.mark = 0
+	ps.i = 0
+	ps.ix = 0
+end
+
+function luxl:SetMessageHandler(handler)
+	self.MsgHandler = handler;
+end
+
+function luxl:GetString()
+	local str = ffi.string(self.buf + self.markix, self.marksz)
+	-- only text and attribute value events can contain entities.
+	if self.event == EVENT_TEXT or self.event == EVENT_ATTR_VAL then
+		return str:gsub("(&%w;)", entity_refs)
+	end
+	return str
+end
+
 	--[[
 	GetNext is responsible for moving through the stream
 	of characters.  At the moment, it's fairly naive in 
@@ -223,106 +405,46 @@ local luxl = {
 	Returns event type, starting offset, size
 	--]]
 
-	GetNext = function(self)
-		local j;
-		local c;
-		local ctype;
-		local match;
-
-		local i = self.ix;
-		local fired=false;
-		local mark=0;
-
-		while (i < self.bufsz and not fired) do
-			c = band(self.buf[i], 0xff);
-			ctype = char_type[c];
-			self.ix = self.ix + 1;
-			if(self.MsgHandler) then
-				self.MsgHandler(i, self.state, c)
+function luxl:GetNext()
+	local event, state_f, c
+	local ps = self.ps
+	ps.mark = 0
+	state_f = STATE_FUNCS[self.state]
+	repeat
+		event, state_f, c = next_char(ps, state_f, self.MsgHandler)
+		-- update state id.
+		self.state = STATE_FUNCS[state_f]
+		if not event then
+			-- handle error
+			-- default to start state
+			self.err = self.err + 1;
+			if self.ErrHandler then
+				self.ErrHandler(ps.i, self.state, c);
 			end
-
-			j=1;
-			match = false;
-			while (LEXER_STATES[j].state ~= ST_ERROR) do
-				if(LEXER_STATES[j].state == self.state) then
-					if LEXER_STATES[j].cclass == CCLASS_LETTERS then
-						match = (ctype == 1 or ctype == 2);
-					elseif LEXER_STATES[j].cclass == CCLASS_LEFT_ANGLE then
-						match = (c == T_LT);
-					elseif LEXER_STATES[j].cclass ==  CCLASS_SLASH then
-						match = (c == T_SLASH);
-					elseif LEXER_STATES[j].cclass == CCLASS_RIGHT_ANGLE then
-						match = (c == T_GT);
-					elseif LEXER_STATES[j].cclass == CCLASS_EQUALS then
-						match = (c == T_EQ);
-					elseif LEXER_STATES[j].cclass == CCLASS_QUOTE then
-						match = (c == T_QUOTE);
-					elseif LEXER_STATES[j].cclass == CCLASS_SPACE then
-						match = (ctype == 3);
-					elseif LEXER_STATES[j].cclass == CCLASS_ANY then
-						match = true;
-					end
-
-
-
-					if(match) then
-						-- we matched a character class
-						if(LEXER_STATES[j].event == EVENT_MARK) then
-							if(mark == 0) then
-								mark = i;
-							end -- mark the position
-						elseif(LEXER_STATES[j].event ~= EVENT_NONE) then
-							if(mark > 0) then
-								-- basically we are guaranteed never to have an event of
-								--   type EVENT_MARK or EVENT_NONE here.
-								self.markix = mark;
-								self.marksz = i-mark;
-								self.event = LEXER_STATES[j].event;
-								fired = true;
-								if(self.EventHandler) then
-									self.EventHandler(self.event, self.markix, self.marksz)
-								end
-							end
-						end
-
-						self.state = LEXER_STATES[j].next_state; -- change state
-						break; -- break out of loop though state search
-					end
-				end
-
-				j = j + 1
-			end
-
-			if(match==0) then
-				-- didn't match, default to start state
-				self.err = self.err + 1;
-				if self.ErrHandler then
-					self.ErrHandler(i, self.state, c);
-				end
-				self.state = ST_START;
-			end
-			i = i + 1
 		end
-
-		if(not fired) then
-			self.event = EVENT_END_DOC;
-		end
-
-		return self.event, self.markix, self.marksz;
-	end,
+	until event
+	-- basically we are guaranteed never to have an event of
+	--   type EVENT_MARK or EVENT_NONE here.
+	self.event = event
+	local markix = ps.mark
+	local marksz = ps.i-ps.mark
+	self.markix = markix
+	self.marksz = marksz
+	if(self.EventHandler) then
+		self.EventHandler(event, markix, marksz)
+	end
+	return event, markix, marksz
+end
 	
-	Lexemes = function(self)
-		return function()
-			local event, offset, size = self:GetNext();
-			if(event == EVENT_END_DOC) then
-				return nil;
-			else
-				return event, offset, size;
-			end
+function luxl:Lexemes()
+	return function()
+		local event, offset, size = self:GetNext();
+		if(event == EVENT_END_DOC) then
+			return nil;
+		else
+			return event, offset, size;
 		end
-	end,
-}
-luxl_mt.__index = luxl;
-
+	end
+end
 
 return luxl
