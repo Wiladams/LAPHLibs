@@ -1,6 +1,6 @@
 
 local ffi = require "ffi"
-require "stream"
+local stream = require "stream"
 
 
 local MemoryStream = {}
@@ -108,18 +108,18 @@ function MemoryStream:WriteString(str, count, offset)
 end
 
 function MemoryStream:Seek(pos, origin)
-	origin = origin or STREAM_SEEK_SET
+	origin = origin or stream.SEEK_SET
 
-	if origin == STREAM_SEEK_CUR then
+	if origin == stream.SEEK_CUR then
 		local newpos = self.Position + pos
 		if newpos >= 0 and newpos < self.Length then
 			self.Position = newpos
 		end
-	elseif origin == STREAM_SEEK_SET then
+	elseif origin == stream.SEEK_SET then
 		if pos >= 0 and pos < self.Length then
 			self.Position = pos;
 		end
-	elseif origin == STREAM_SEEK_END then
+	elseif origin == stream.SEEK_END then
 		local newpos = self.Length-1 + pos
 		if newpos >= 0 and newpos < self.Length then
 			self.Position = newpos
