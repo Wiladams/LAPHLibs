@@ -1,19 +1,18 @@
 --[[
-	References
-
-	http://www.faqs.org/rfcs/rfc3076.html
-	http://www.w3.org/TR/REC-xml/
-
 	This code was derived from the pico_xml project
 	which can be found here:
 
 	http://kd7yhr.org/bushbo/pico_xml.md
 
-	The original code, written in C by Brian O. Bush
-	contained the following copyright:
+	The original C code, written by: Brian O. Bush
 
-	Copyright (c) 2004-2006 by Brian O. Bush
+	Pure Lua Version written by: William A Adams
+	Dramatic Speed Improvements by: Robert G Jakabosky
 
+	References
+
+	http://www.faqs.org/rfcs/rfc3076.html
+	http://www.w3.org/TR/REC-xml/
 
 ]]
 
@@ -24,7 +23,7 @@ local band = bit.band
 
 --[[
  Types of characters; 0 is not valid, 1 is letters, 2 are digits
-   (including '.') and 3 whitespace. 
+   (including '.') and 3 whitespace.
 --]]
 
 local char_type = ffi.new("const int[256]", {
@@ -382,28 +381,20 @@ function luxl:SetMessageHandler(handler)
 	self.MsgHandler = handler;
 end
 
-function luxl:GetString()
-	local str = ffi.string(self.buf + self.markix, self.marksz)
-	-- only text and attribute value events can contain entities.
-	if self.event == EVENT_TEXT or self.event == EVENT_ATTR_VAL then
-		return str:gsub("(&%w;)", entity_refs)
-	end
-	return str
-end
 
-	--[[
+--[[
 	GetNext is responsible for moving through the stream
-	of characters.  At the moment, it's fairly naive in 
+	of characters.  At the moment, it's fairly naive in
 	terms of character encodings.
-	
-	In a more robust implementation, luxl will read from a 
-	stream, which knows about the specific encoding, and 
+
+	In a more robust implementation, luxl will read from a
+	stream, which knows about the specific encoding, and
 	will hand out code points based on that particular encoding.
-	
+
 	So, only straight ASCII for the moment.
-	
+
 	Returns event type, starting offset, size
-	--]]
+--]]
 
 function luxl:GetNext()
 	local event, state_f, c
@@ -435,7 +426,7 @@ function luxl:GetNext()
 	end
 	return event, markix, marksz
 end
-	
+
 function luxl:Lexemes()
 	return function()
 		local event, offset, size = self:GetNext();

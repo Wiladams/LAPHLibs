@@ -1,4 +1,6 @@
-#!/usr/bin/env lua
+package.path = package.path..";..\\?.lua";
+
+--#!/usr/bin/env lua
 local socket = require"socket"
 local time = socket.gettime
 local clock = os.clock
