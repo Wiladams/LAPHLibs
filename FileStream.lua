@@ -33,6 +33,19 @@ function FileStream.Open(filename, mode)
 end
 
 
+function FileStream:GetLength()
+	local currpos = self.FileHandle:seek()
+	local size = self.FileHandle:seek("end")
+
+	self.FileHandle:seek("set",currpos)
+
+	return size;
+end
+
+function FileStream:GetPosition()
+	local currpos = self.FileHandle:seek()
+	return currpos;
+end
 
 function FileStream:Seek(offset, origin)
 	offset = offset or 0
@@ -80,7 +93,15 @@ end
 
 function FileStream:WriteBytes(buffer, len, offset)
 	offset = offset or 0
-	local str = ffi.string(buffer+offset, len)
+
+	if type(buffer) == "string" then
+		self.FileHandle:write(buffer)
+		return len
+	end
+
+	-- assume we have a pointer to a buffer
+	-- convert to string and write it out
+	local str = ffi.string(buffer, len)
 	self.FileHandle:write(str)
 
 	return len

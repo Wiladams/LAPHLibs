@@ -1,9 +1,17 @@
 --[[
 	Abstract interface for a stream object
 
+	-- Attributes of the stream
+	function Stream:GetLength()
+	end
+
+	function Stream:GetPosition()
+	end
+
 	function Stream:Seek(offset, origin)
 	end
 
+	-- Reading interface
 	function Stream:ReadByte()
 		return nil;
 	end
@@ -17,6 +25,7 @@
 	end
 
 
+	-- Writing interface
 	function Stream:WriteByte(value)
 		return 0
 	end

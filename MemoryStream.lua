@@ -18,6 +18,14 @@ function MemoryStream.new(size, buff)
 	return obj
 end
 
+function MemoryStream:GetLength()
+	return self.Length
+end
+
+function MemoryStream:GetPosition()
+	return self.Position
+end
+
 --[[
 	Reading interface
 --]]

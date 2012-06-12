@@ -1,18 +1,18 @@
 package.path = package.path..";..\\?.lua";
 
 MemoryStream = require "MemoryStream"
-
+local stream = require "stream"
 
 function printStreamState(stream)
-	print(stream.Length)
-	print(stream.Position)
+	print(stream:GetLength())
+	print(stream:GetPosition())
 end
 
 function test_ReadStream()
 	local rstream = MemoryStream.new(1024)
 	printStreamState(rstream);
 
-	rstream:Seek(0, SEEK_END)
+	rstream:Seek(0, stream.SEEK_END)
 	printStreamState(rstream);
 end
 
@@ -37,6 +37,6 @@ function test_WriteReadStream()
 	io.write("'",stream:ReadString(6),"'\n")
 end
 
---test_ReadStream();
+test_ReadStream();
 
-test_WriteReadStream();
+--test_WriteReadStream();
