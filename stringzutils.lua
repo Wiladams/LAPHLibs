@@ -128,13 +128,19 @@ function strndup(str,n)
 end
 
 function strdup(str)
-	str = ffi.cast("const char *", str)
-	-- use strlen because we don't know what kind of string
-	-- we're being passed.  It could be a Lua string, or a byte array
-	local len = strlen(str)
+	-- In the case of a Lua string
+	-- create a VLA and initialize
+	if type(str) == "string" then
+		return ffi.new("uint8_t [?]", #str+1, str)
+	end
 
-	local newstr = ffi.new("char["..(len+1).."]");
-	ffi.copy(newstr, str, len)
+	-- Most dangerous, assuming it's a null terminated
+	-- string.
+	local len = strlen(str)
+	local newstr = ffi.new("char[?]", (len+1));
+	local strptr = ffi.cast("const char *", str)
+
+	ffi.copy(newstr, ffi.cast("const char *", str), len)
 	newstr[len] = 0
 
 	return newstr
@@ -301,6 +307,14 @@ local function hextobin(s)
 end
 
 return {
+	strchr = strchr,
+	strcmp = strcmp,
+	strncmp = strncmp,
+	strncasecmp = strncasecmp,
+	strcpy = strcpy,
+	strndup = strndup,
+	strdup = strdup,
+
 	strlen = strlen,
 
 	bintohex = bintohex,
