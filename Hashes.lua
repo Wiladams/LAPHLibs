@@ -15,7 +15,16 @@ local randbox = ffi.new("uint32_t[16]", {
     });
 
 function hash_fun_default(key, len)
-	len = len or #key
+	if not len then
+		if type(key) == "string" then
+			len = #key
+		elseif type(key) == "cdata" then
+			len = ffi.sizeof(key)
+		else
+			return nil
+		end
+	end
+
     local str = ffi.cast("uint8_t *", key);
     local acc = 0;
 	local offset = 0

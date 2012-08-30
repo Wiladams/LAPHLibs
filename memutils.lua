@@ -96,6 +96,39 @@ function memmove(dst, src, num)
 	return dst
 end
 
+local function memreverse(buff, bufflen)
+	local i = 0;
+	local tmp
+
+	while (i < (bufflen)/2) do
+		tmp = buff[i];
+		buff[i] = buff[bufflen-i-1];
+		buff[bufflen-i-1] = tmp;
+
+		i = i + 1;
+	end
+	return buff
+end
+
+local function getreverse(src, len)
+	if not len then
+		if type(src) == "string" then
+			len = #src
+		else
+			return nil, "unknown length"
+		end
+	end
+
+	local srcptr = ffi.cast("const uint8_t *", src);
+	local dst = ffi.new("uint8_t[?]", len)
+
+	for i = 0, len-1 do
+		dst[i] = srcptr[len-1-i];
+	end
+
+	return dst, len
+end
+
 return {
 	ARRAY_SIZE = ARRAY_SIZE,
 	bcmp = bcmp,
@@ -107,4 +140,6 @@ return {
 	memcmp = memcmp,
 	memmove = memmove,
 	memset = memset,
+
+	memreverse = memreverse,
 }

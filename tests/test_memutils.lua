@@ -75,12 +75,24 @@ function test_bin2str()
 	print("str: ", str);
 end
 
-test_strcmp();
+function test_memreverse()
+	local src = "William A Adams";
+	local p = strdup(src);
 
-test_array_size();
+	mutils.memreverse(p, #src);
 
-test_strchr();
+	print(ffi.string(p, #src));
 
-test_strstr();
+end
 
-test_bin2str();
+--test_strcmp();
+
+--test_array_size();
+
+--test_strchr();
+
+--test_strstr();
+
+--test_bin2str();
+
+test_memreverse();

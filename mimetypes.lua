@@ -1599,4 +1599,13 @@ local mimetypes = {
 {"x-conference","x-cooltalk ice"};
 };
 
-return mimetypes;
+mime = {}
+mime.types = mimetypes
+
+mime.default = "application/octet-stream"
+
+function mime.getType(path)
+  return mime.table[path:lower():match("[^.]*$")] or mime.default
+end
+
+return mime;
