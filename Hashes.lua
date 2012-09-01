@@ -14,7 +14,7 @@ local randbox = ffi.new("uint32_t[16]", {
 	0x69232f74, 0xfead7bb3, 0xe9089ab6, 0xf012f6ae,
     });
 
-function hash_fun_default(key, len)
+function KazHash(key, len)
 	if not len then
 		if type(key) == "string" then
 			len = #key
@@ -25,7 +25,7 @@ function hash_fun_default(key, len)
 		end
 	end
 
-    local str = ffi.cast("uint8_t *", key);
+    local str = ffi.cast("const uint8_t *", key);
     local acc = 0;
 	local offset = 0
 
@@ -43,5 +43,5 @@ function hash_fun_default(key, len)
 end
 
 return {
-	KazHash = hash_fun_default,
+	KazHash = KazHash,
 }

@@ -50,6 +50,14 @@ contains several routines that have
 C equivalents, such as memset, memcpy, memcmp, memchr, memmove.  Also contains a few convenience functions related to dealing
 with chunks of memory.
 
+mime.lua
+========
+Contains a table and function that maps between a file extension and the appropriate mime type.
+
+mimetypes.lua
+=============
+Contains a table of well known mime types.
+
 stringzutils.lua
 ================ 
 Contains a set of functions that deal with 
