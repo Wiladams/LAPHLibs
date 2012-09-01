@@ -139,16 +139,13 @@ local kvec_mt = {
 }
 
 
-
-local function makekvec(ct)
-	local tp = ffi.typeof("struct { int n, m; $ *Data; }", ct);
+local function makevec(ct)
+	local tp = ffi.typeof("struct { int n, Capacity; $ *Data; }", ct);
 
 	return ffi.metatype(tp, kvec_mt)
 end
 
 
-
-
 return {
-	NewKind = makekvec,
+	NewKind = makevec,
 }
