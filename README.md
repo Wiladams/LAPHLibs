@@ -4,13 +4,27 @@ LAPHLibs
 Lua Application Programming Helper Libraries
 
 This is a repository of things I have found to be useful
-while programming in LuaJIT.  In particular, there are
-a number of functions that are useful when you're programming
-using the FFI.
+while programming in LuaJIT.  
+
+In most cases, the routines use features that are very specific to the LuaJIT variant of Lua.  In particular, the LuaJIT FFI feature is heavily used.  This gives many of the routines a fairly familiar 'C' look and feel, but they take on some of the better characteristics of Lua, namely memory management.
+
+
+This set of functions is constantly evolving as LuaJIT itself improves, as well as my own knowledge of how best to use it.
+
+Current: Works against LUAJIT git HEAD as of 25/09/2012
+
 
 ascii.lua
 =========
 This file contains a table of the ASCII character set, with numeric values and descriptions.  There are routines to create constant values from the table.
+
+bencode.lua
+===========
+Implementation of the bencode format, which is used to encode/decode torrent files.
+
+BinaryStream.lua
+================
+A 'class' that can deal with reading and writing of binary values from/to a stream.  You can configure the stream to deal with a big or little endian source.
 
 BitBang.lua
 ===========
@@ -25,6 +39,10 @@ Implementation of the isxxx() character classification functions typically found
 CRC32.lua
 =========
 Implementation of a CRC32 routine
+
+httpheaders.lua
+===============
+A simple Lua table containing HTTP headers.  The table contains information as to whether the header is used for requests, responses, or both.  This simple table can be used directly, or turned into another form, depending on your requirements.
 
 limits.lua
 ==========
@@ -56,7 +74,7 @@ Contains a table and function that maps between a file extension and the appropr
 
 mimetypes.lua
 =============
-Contains a table of well known mime types.
+A simple Lua table which contains mime type information.
 
 stringzutils.lua
 ================ 

@@ -5,25 +5,8 @@ local bor = bit.bor
 local rshift = bit.rshift
 local lshift = bit.lshift
 
---[[
-	binary functions
 
-	ARRAY_SIZE
-	bzero
-	bcopy
-	bcmp
---]]
 
--- This is a hack
--- It will only work with a one dimensional array, and not with pointers
-function ARRAY_SIZE(array)
-	local typestr = tostring(ffi.typeof(array))
-
-	--local elemtype, nelem = string.match(typestr, "ctype<(%w+)%s+%[(%d+)%]>")
-	local nelem = string.match(typestr, "(%d+)")
-
-	return tonumber(nelem)
-end
 
 
 
@@ -130,7 +113,6 @@ local function getreverse(src, len)
 end
 
 return {
-	ARRAY_SIZE = ARRAY_SIZE,
 	bcmp = bcmp,
 	bcopy = bcopy,
 	bzero = bzero,
