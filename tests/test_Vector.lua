@@ -1,4 +1,4 @@
-package.path = package.path..";..\\?.lua";
+package.path = package.path..";../?.lua";
 
 local ffi = require "ffi"
 
@@ -37,6 +37,6 @@ function test_Enumerate()
 end
 
 
---test_Vector();
+test_Vector();
 
 test_Enumerate();
