@@ -1,4 +1,4 @@
-package.path = package.path..";..\\?.lua";
+package.path = package.path..";../?.lua";
 
 local MemoryStream = require "MemoryStream"
 local Stream = require "Stream"

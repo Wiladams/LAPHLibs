@@ -1,6 +1,6 @@
-package.path = package.path..";..\\?.lua";
+package.path = package.path..";../?.lua";
 
-local utf8 = require "utf8"
+local utf8 = require "utf"
 
 function test_decode()
 	local utf8string = "Here is the string to be tested";

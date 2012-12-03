@@ -1,4 +1,4 @@
-package.path = package.path..";..\\?.lua";
+package.path = package.path..";../?.lua";
 
 local Hashes = require "Hashes"
 local kazhash = Hashes.KazHash
