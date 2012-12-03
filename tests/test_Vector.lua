@@ -37,6 +37,6 @@ function test_Enumerate()
 end
 
 
---test_Vector();
+test_Vector();
 
 test_Enumerate();
