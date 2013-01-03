@@ -5,7 +5,7 @@ local array_tv = function(ct)
 end
 
 local pointer_t = function(ct)
-	return ffi.typeof("* $", ct)
+	return ffi.typeof("$ * ", ct)
 end
 
 
@@ -52,20 +52,31 @@ local c99_types = {
 
 	int8_t = int8_t,
 	int8_tv = int8_tv,
+
 	uint8_t = uint8_t,
 	uint8_tv = uint8_tv,
 
 	int16_t = int16_t,
 	int16_tv = int16_tv,
 	
+	uint16_t = uint16_t,
+	uint16_tv = uint16_tv,
+
 	int32_t = int32_t,
 	int32_tv = int32_tv,
 	
+	uint32_t = uint32_t,
+	uint32_tv = uint32_tv,
+
 	int64_t = int64_t,
 	int64_tv = int64_tv,
 	
+	uint64_t = uint64_t,
+	uint64_tv = uint64_tv,
+
 	float = float,
 	floatv = floatv,
+	
 	double = double,
 	doublev= doublev,
 

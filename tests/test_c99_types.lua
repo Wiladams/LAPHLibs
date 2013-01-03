@@ -4,6 +4,9 @@ local ffi = require ("ffi")
 
 c99 = require ("c99_types")
 
+d0 = ffi.new("double[20]")
+print("D0 type: ", ffi.typeof(d0))
+
 d1 = c99.doublev(20)
 
 print(ffi.sizeof(d1))
@@ -11,8 +14,8 @@ print(type(d1[0]))
 
 
 f1 = c99.floatv(20)
-print(ffi.sizeof(f1))
-print(ffi.typeof(f1))
+print("f1 size: ", ffi.sizeof(f1))
+print("f1 type: ", ffi.typeof(f1))
 
 -- Allocate anew based on the first array
 f2 = ffi.typeof(f1)(40)
