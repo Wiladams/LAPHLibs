@@ -1,6 +1,7 @@
 
 local ffi = require "ffi"
 
+require "cctype"
 
 
 local function bytestohex(data, datalen)
@@ -15,10 +16,6 @@ local function bytestohex(data, datalen)
 	end
 
 	return table.concat(aline)
-end
-
-function isprint(c)
-	return c >= 0x20 and c < 0x7f
 end
 
 local function bytestohexstring(data, datalen)
@@ -46,8 +43,6 @@ end
 
 
 return {
-	mreverse = mreverse;
-
 	bytestohex = bytestohex;
 	bytestohexstring = bytestohexstring;
 	blobtohex = blobtohex;

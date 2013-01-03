@@ -69,6 +69,7 @@ function isprint(c)
 	return c >= 0x20 and c < 0x7f
 end
 
+
 function ispunct(c)
 	return isgraph(c) and not isalnum(c)
 --[[
@@ -79,7 +80,7 @@ function ispunct(c)
 --]]
 end
 
--- ' ' 0x0a, '\t' 0x09, '\n' 0x0a, '\v' 0x0b, '\f' 0x0c, '\r' 0x0d
+-- ' ' 0x20, '\t' 0x09, '\n' 0x0a, '\v' 0x0b, '\f' 0x0c, '\r' 0x0d
 function isspace(c)
 	return c == 0x20 or (c >= 0x09 and c<=0x0d)
 end

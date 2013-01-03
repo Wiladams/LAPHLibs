@@ -8,7 +8,11 @@ local lshift = bit.lshift
 
 
 
-
+ffi.cdef[[
+void * malloc ( size_t size );
+void free ( void * ptr );
+void * realloc ( void * ptr, size_t size );
+]]
 
 function bzero(dest, nbytes)
 	ffi.fill(dest, nbytes)

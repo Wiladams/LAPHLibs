@@ -7,23 +7,7 @@ local bxor = bit.bxor
 local bnot = bit.bnot
 local rshift = bit.rshift
 
---[==[
-ffi.cdef[[
-typedef union  {
-		uint8_t		Byte;
-		int16_t 	Short;
-		uint16_t	UShort;
-		int32_t		Int32;
-		uint32_t	UInt32;
-		int64_t		Int64;
-		uint64_t	UInt64;
-		float 		f;
-		double 		d;
-		uint8_t bytes[8];
-} bittypes_t
-]]
-bittypes = ffi.typeof("bittypes_t")
---]==]
+
 function isset(value, bit)
 	return band(value, 2^bit) > 0
 end

@@ -1,15 +1,14 @@
+local ffi = require "ffi"
+local C = ffi.C
+
 local bit = require "bit"
 local bor = bit.bor
 local rshift = bit.rshift
 local lshift = bit.lshift
-local ffi = require "ffi"
-local C = ffi.C
 
-ffi.cdef[[
-void * malloc ( size_t size );
-void free ( void * ptr );
-void * realloc ( void * ptr, size_t size );
-]]
+local memutils = require "memutils"
+
+
 
 -- round up to the nearest
 -- power of 2
@@ -29,17 +28,6 @@ end
 local Vector = {}
 local Vector_mt = {
 	__index = Vector,
---[[	
-	function(tbl, key)
-		
-		if type(key) == "number" then
-			local data = rawget(tbl, "Data");
-			return data[key];
-		end
-		
-		return Vector[key]
-	end,
---]]
 }
 			
 Vector.new = function(elemtype, capacity)
