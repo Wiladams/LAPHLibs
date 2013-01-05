@@ -36,8 +36,15 @@ function tsplit(s,sep)
    return accumulate({}, gsplit(s,sep))
 end
 
+local function trim(s)
+	local from = s:match"^%s*()"
+ 	return from > #s and "" or s:match(".*%S", from)
+end
+
 return {
 	tsplit = tsplit,
 	split = split,
 	gsplit = gsplit,
+
+	trim = trim,
 }
