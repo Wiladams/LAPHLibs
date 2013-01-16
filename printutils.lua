@@ -5,6 +5,9 @@ require "cctype"
 
 
 local function bytestohex(data, datalen)
+	datalen = datalen or #data
+	data = ffi.cast("const uint8_t *", data)
+	
 	local aline = {}
 	for i=0, datalen-1 do
 		table.insert(aline, string.format("%02x", data[i]));

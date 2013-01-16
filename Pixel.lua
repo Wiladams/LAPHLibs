@@ -64,7 +64,6 @@ local RGB_mt = {
 		return string.format("%d, %d, %d", self.Red, self.Green, self.Blue);
 	end,
 
-
 }
 
 

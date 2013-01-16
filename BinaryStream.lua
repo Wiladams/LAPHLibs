@@ -308,6 +308,10 @@ function BinaryStream:WriteByte(value)
 	return self.Stream:WriteByte(value) == 1;
 end
 
+function BinaryStream:WriteBytes(buff, length, offset)
+	return self.Stream:WriteBytes(buff, length, offset);
+end
+
 function BinaryStream:WriteInt16(value)
 	self.types_buffer.Int16 = value
 
