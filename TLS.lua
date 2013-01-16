@@ -63,11 +63,8 @@ TLS.ContentType = {
 TLS.TLSPlaintext_t = {}
 TLS.TLSPlaintext_mt = {
 	__tostring = function(self)
-		return string.format([[
-			ContentType: %d,
-			version: %s,
-			length: %d
-			]], self.ContentType, tostring(self.version), self.length)
+		return string.format([[{ContentType= %d, version= %s,length= %d}]], 
+			self.ContentType, tostring(self.version), self.length)
 	end,
 
 	__index = TLS.TLSPlaintext_t
@@ -88,11 +85,17 @@ TLS.TLSPlaintext = function(ctype, fragment, length, version)
 	return obj
 end 
 
+TLS.TLSPlaintext_t.Length = function(self)
+	return self.length;
+end
+
 TLS.TLSPlaintext_t.WriteToStream = function(self, bstream)
 	bstream:WriteByte(self.ContentType);
 	self.version:WriteToStream(bstream)
 	bstream:WriteInt16(self.length);
-	bstream:WriteBytes(ffi.cast("const uint8_t *", self.fragment), self.length);
+	if self.fragment then
+		bstream:WriteBytes(ffi.cast("const uint8_t *", self.fragment), self.length);
+	end
 end
 
 TLS.TLSPlaintext_t.ReadFromStream = function(self, bstream)
@@ -212,10 +215,6 @@ end
 --]]
 TLS.HelloRequest_t = {}
 TLS.HelloRequest_mt = {
-	__len = function(self)
-		return 0
-	end,
-
 	__index = TLS.HelloRequest_t
 }
 TLS.HelloRequest = function()
@@ -226,6 +225,9 @@ TLS.HelloRequest = function()
 	return obj
 end
 
+TLS.HelloRequest_t.Length = function(self)
+	return 0;
+end
 
 --[[
 	Random
@@ -614,7 +616,14 @@ TLS.TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA      = TLS.CipherSuite(0x00,0x16 );
      TLS_DH_anon_WITH_3DES_EDE_CBC_SHA      = CipherSuite{ 0x00,0x1B };
 --]]
 
+TLS.buff2num(buff, len)
+	local value = 0
+	for i=1,len do
+		value = bor(lshift(value,8), buff[len-1])
+	end
+end
 
-
+TLS.num2buff(num)
+end
 
 return TLS;
