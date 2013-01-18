@@ -1005,6 +1005,10 @@ mime.types = {
 
 mime.DefaultType = "application/octet-stream";
 
+mime.GetTypeFromExtension = function(ext)
+	return mime.types[ext:lower()] or mime.DefaultType
+end
+
 mime.GetType = function(path)
   return mime.types[path:lower():match("[^.]*$")] or mime.DefaultType
 end

@@ -1,4 +1,6 @@
 local ReseneColors = {
+
+-- Whites
 antique_white = {250, 235, 215},
 azure = {240, 255, 255},
 bisque = {255, 228, 196},
@@ -29,6 +31,8 @@ wheat = {245, 222, 179},
 white = {255, 255, 255},
 white_smoke = {245, 245, 245},
 zinc_white = {253, 248, 255},
+
+-- Greys
 cold_grey = {128, 138, 135},
 dim_grey = {105, 105, 105},
 grey = {192, 192, 192},
@@ -37,9 +41,13 @@ slate_grey = {112, 128, 144},
 slate_grey_dark = {47, 79, 79},
 slate_grey_light = {119, 136, 153},
 warm_grey = {128, 128, 105},
+
+-- Blacks
 black = {0, 0, 0},
 ivory_black = {41, 36, 33},
 lamp_black = {46, 71, 59},
+
+-- Reds
 alizarin_crimson = {227, 38, 54},
 brick = {156, 102, 31},
 cadmium_red_deep = {227, 23, 13},
@@ -62,6 +70,8 @@ rose_madder = {227, 54, 56},
 salmon = {250, 128, 114},
 tomato = {255, 99, 71},
 venetian_red = {212, 26, 31},
+
+-- Browns
 beige = {163, 148, 128},
 brown = {128, 42, 42},
 brown_madder = {219, 41, 41},
@@ -88,6 +98,8 @@ saddle_brown = {139, 69, 19},
 sandy_brown = {244, 164, 96},
 tan = {210, 180, 140},
 van_dyke_brown = {94, 38, 5},
+
+-- Oranges
 cadmium_orange = {255, 97, 3},
 cadmium_red_light = {255, 3, 13},
 carrot = {237, 145, 33},
@@ -97,6 +109,8 @@ mars_yellow = {227, 112, 26},
 orange = {255, 128, 0},
 orange_red = {255, 69, 0},
 yellow_ochre = {227, 130, 23},
+
+-- Yellows
 aureoline_yellow = {255, 168, 36},
 banana = {227, 207, 87},
 cadmium_lemon = {255, 227, 3},
@@ -111,6 +125,8 @@ melon = {227, 168, 105},
 naplesyellowdeep = {255, 168, 18},
 yellow = {255, 255, 0},
 yellow_light = {255, 255, 224},
+
+-- Greens
 chartreuse = {127, 255, 0},
 chromeoxidegreen = {102, 128, 20},
 cinnabar_green = {97, 179, 41},
@@ -138,6 +154,8 @@ spring_greenmedium = {0, 250, 154},
 terre_verte = {56, 94, 15},
 viridian_light = {110, 255, 112},
 yellow_green = {154, 205, 50},
+
+-- Cyans
 aquamarine = {127, 255, 212},
 aquamarinemedium = {102, 205, 170},
 cyan = {0, 255, 255},
@@ -146,6 +164,8 @@ turquoise = {64, 224, 208},
 turquoise_dark = {0, 206, 209},
 turquoise_medium = {72, 209, 204},
 turquoise_pale = {175, 238, 238},
+
+-- Blues
 alice_blue = {240, 248, 255},
 blue = {0, 0, 255},
 blue_light = {173, 216, 230},
@@ -173,6 +193,8 @@ steel_blue = {70, 130, 180},
 steel_blue_light = {176, 196, 222},
 turquoise_blue = {0, 199, 140},
 ultramarine = {18, 10, 143},
+
+-- Magentas
 blue_violet = {138, 43, 226},
 cobalt_violetdeep = {145, 33, 158},
 magenta = {255, 0, 255},
