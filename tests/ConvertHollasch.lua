@@ -22,7 +22,7 @@ ConvertHollaschFile = function(filename)
 		return name, r, g, b
 	end
 
-	io.write("local ReseneColors = {\n");
+	io.write("local HollaschColors = {\n");
 	for line in io.lines(filename) do
 		local name, red,green,blue = parseline(line)
 		--print(name, red, green,blue)

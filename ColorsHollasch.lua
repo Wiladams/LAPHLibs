@@ -1,4 +1,4 @@
-local ReseneColors = {
+local HollaschColors = {
 
 -- Whites
 antique_white = {250, 235, 215},
