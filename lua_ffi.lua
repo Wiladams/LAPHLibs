@@ -747,7 +747,7 @@ return luajit
 
 	The Lua form of these C header files were created by:
 
-	Author: William Adams (william_a_adams@msn.com)
+	Author: William Adams (william@nanotechstyles.com)
 
 	Although the Lua versions of the files have some changes to match the luajit
 	ffi style, there were no substantive changes beyond that.
