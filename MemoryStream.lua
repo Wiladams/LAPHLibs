@@ -165,6 +165,9 @@ function MemoryStream:ReadString(count)
 
 	local src = ffi.cast("const uint8_t *", self.Buffer)+pos
 
+	-- advance the stream position
+	self.Position = pos + maxbytes
+
 	return ffi.string(src, maxbytes)
 end
 

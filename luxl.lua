@@ -338,7 +338,7 @@ local luxl_mt = { __index = luxl }
 
 function luxl.new(buffer, bufflen)
 	local newone = {
-		buf = buffer;			-- pointer to "uint8_t *" buffer (0 based)
+		buf = ffi.cast("const uint8_t *", buffer);			-- pointer to "uint8_t *" buffer (0 based)
 		bufsz = bufflen;		-- size of input buffer
 		state = ST_START;		-- current state
 		event = EVENT_NONE;		-- current event

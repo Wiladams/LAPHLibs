@@ -7,10 +7,6 @@ require "luxl_util"
 local cases = require "xml_samples"
 require "stringzutils"
 
-
-
-
-
 function CreateFlatXTable(xlex, currentelement)
 	currentelement = currentelement or {}
 
@@ -132,4 +128,4 @@ function main()
 	--print(tbl.amf.object.mesh.vertices.vertex.coordinates.z._Content);
 end
 
-main();
+--main();

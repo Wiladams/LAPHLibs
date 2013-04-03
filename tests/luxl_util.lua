@@ -97,46 +97,46 @@ end
 	retained.
 --]]
 GetString = function (src, offset, len)
-	local i, j, k
-	local found = false;
 
 	local sz = len;
 	local buf = ffi.new("char[?]",(sz + 1));
 
-	if(buf ~= nil) then
-		i=offset;
-		j=0;
-		while (i<offset+sz) do
-			-- i indexes src buffer, while j indexes output buffer
-			-- do entity ref expansion
-			if(src[i] == '&' and i+1 < sz) then
-				i = i + 1;
-				k = 0;
-				found = false;
-				while(entity_refs[k].entity ~= 0 ) do
-					if(strncmp(src+i, entity_refs[k].entity, entity_refs[k].sz) == 0) then
-						buf[j] = entity_refs[k].ch;
-						i = i + entity_refs[k].sz - 1; -- increment index into src
-						found = true;
-						break;
-					end
-					k = k + 1;
+	if not buf then return false, "out of memory" end
+	
+	local i = offset;
+	local j = 0;
+	local found = false;
+	while (i<offset+sz) do
+		-- i indexes src buffer, while j indexes output buffer
+		-- do entity ref expansion
+		if(src[i] == string.byte'&' and i+1 < sz) then
+			i = i + 1;
+			local k = 0;
+			found = false;
+			while(entity_refs[k].entity ~= 0 ) do
+				if(strncmp(src+i, entity_refs[k].entity, entity_refs[k].sz) == 0) then
+					buf[j] = entity_refs[k].ch;
+					i = i + entity_refs[k].sz - 1; -- increment index into src
+					found = true;
+					break;
 				end
+				k = k + 1;
+			end
 
-				if (not found) then
-					-- didn't find any defined entity
-					--buf[j] = src[--i];
-					i = i - 1;
-					buf[j] = src[i];
-				end
-			else
+			if (not found) then
+				-- didn't find any defined entity
+				--buf[j] = src[--i];
+				i = i - 1;
 				buf[j] = src[i];
 			end
-			j = j + 1;
-			i = i + 1;
+		else
+			buf[j] = src[i];
 		end
-		buf[j] = 0; -- null terminate
+		j = j + 1;
+		i = i + 1;
 	end
+	
+	buf[j] = 0; -- null terminate
 
 	return ffi.string(buf);
 end

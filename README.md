@@ -32,6 +32,10 @@ Lowest level bit twiddling.  Builds upon the bitops
 allowing the getting/setting of bit values within a larger
 array of values.
 
+c99_types.lua
+=============
+Helper support for types typically found in stdint.h
+
 cctype.lua
 ==========
 Implementation of the isxxx() character classification functions typically found in the libc libraries.  These routines operate on numbers, and return boolean values.

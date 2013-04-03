@@ -4,6 +4,7 @@ ffi.cdef[[
 typedef int v4si __attribute__((vector_size(16)));
 ]]
 v4si = ffi.typeof("v4si")
+
 v4si_mt = {
 	__tostring = function(self)
 		return string.format("%d, %d, %d, %d", self[0], self[1], self[2], self[3]);
@@ -22,15 +23,20 @@ v4si_mt = {
 }
 v4si = ffi.metatype(v4si, v4si_mt)
 
+
 a = v4si(10,20,30)
 b = v4si(1,1,1,1)
 c = v4si(a);
-c[2] = 150;
+-- Can not do the following
+--c[2] = 150
+--ffi.cast("int *",c)[2] = 150;
 
 print("a: ", a)
 print("b: ", b)
 print("c: ", c);
 
+-- These will work, as long as the metatype
+-- is defined.
 print("a + b: ", a + b)
 print("a - b: ", a - b)
 print("a + 5: ", a + 5)
