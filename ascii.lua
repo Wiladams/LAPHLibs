@@ -26,7 +26,7 @@
 	it into your program and use the constants.
 --]]
 
-ASCIILookupTable = {
+local ASCIILookupTable = {
 {"NUL",		0, "null"};
 {"SOH",		1, "start of heading"};
 {"STX",		2, "start of text"};
@@ -157,7 +157,7 @@ ASCIILookupTable = {
 {"DEL",		127,  "delete"};
 }
 
-function GetASCIITokens()
+local function GetASCIITokens()
 	local res = {};
 
 	for i,v in ipairs(ASCIILookupTable) do
@@ -167,7 +167,7 @@ function GetASCIITokens()
 	return table.concat(res);
 end
 
-function CreateASCIITokens()
+local function CreateASCIITokens()
 	local str = GetASCIITokens()
 	local f = loadstring(str)
 	f();
@@ -179,3 +179,9 @@ end
 -- to be available in your program
 --CreateASCIITokens();
 
+local exports = {
+	GetASCIITokens = GetASCIITokens;
+	CreateASCIITokens = CreateASCIITokens;
+}
+
+return exports

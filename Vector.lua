@@ -30,7 +30,7 @@ local Vector_mt = {
 	__index = Vector,
 }
 			
-Vector.new = function(elemtype, capacity)
+function Vector.new(elemtype, capacity)
 
 	capacity = capacity or 0
 
@@ -52,16 +52,16 @@ function Vector:Free()
 end
 
 -- Maximumm number of elements
-Vector.Max = function(self)
+function Vector.Max(self)
 	return self.Capacity;
 end
 
 -- Current number of elements in vector
-Vector.Size = function(self)
+function Vector.Size(self)
 	return self.n;
 end
 
-Vector.Realloc = function(self, nelems)
+function Vector.Realloc(self, nelems)
 	if nelems == 0 then
 		if self.Data ~= nil then
 			ffi.C.free(self.Data)
@@ -86,7 +86,7 @@ end
 
 -- access an element
 -- perform bounds checking and resizing
-Vector.a = function(v, i) 
+function Vector.a(v, i) 
 	if v.Capacity <= i then						
 		v.Capacity = i + 1; 
 		v.n = i + 1;
@@ -102,7 +102,7 @@ Vector.a = function(v, i)
 end	  
 
 -- Access without bounds checking
-Vector.Elements = function(self)
+function Vector.Elements(self)
 	local index = -1;
 	
 	local clojure = function()
@@ -116,16 +116,16 @@ Vector.Elements = function(self)
 	return clojure
 end
 
-Vector.A = function(self, i)
+function Vector.A(self, i)
 	return self.Data[i];
 end
 
-Vector.Resize = function(self, s) 
+function Vector.Resize(self, s) 
 	self.Capacity = s; 
 	self:Realloc(self.Data, self.Capacity)
 end
 		
-Vector.Copy = function(self, v0)
+function Vector.Copy(self, v0)
 	-- If we're too small, then increase
 	-- size to match
 	if (self.Capacity < v0.n) then
@@ -137,12 +137,12 @@ Vector.Copy = function(self, v0)
 end
 		
 -- pop, without bounds checking
-Vector.Pop = function(self)
+function Vector.Pop(self)
 	self.n = self.n-1;
 	return self.Data[self.n]
 end
 
-Vector.Push = function(v, x) 
+function Vector.Push(v, x) 
 	if (v.n == v.Capacity) then	
 		if v.Capacity > 0 then
 			v.Capacity = lshift(v.Capacity, 1)
@@ -156,7 +156,7 @@ Vector.Push = function(v, x)
 	v.n = v.n + 1;
 end
 		
-Vector.Pushp = function(v) 
+function Vector.Pushp(v) 
 	if (v.n == v.Capacity) then
 		if v.Capacity > 0 then
 			v.Capacity = lshift(v.Capacity, 1)
