@@ -55,10 +55,10 @@ typedef struct {
 	double h, s, l;
 } HSLColor, *PHSLColor;
 ]]
-HSLColor = ffi.typeof("HSLColor")
-HSLColor_p = ffi.typeof("PHSLColor")
+local HSLColor = ffi.typeof("HSLColor")
+local HSLColor_p = ffi.typeof("PHSLColor")
 
-HSLColor_mt = {
+local HSLColor_mt = {
 	--[[
    		Calculate HSL from RGB
    		Hue is in degrees

@@ -19,7 +19,7 @@
 	
 --]]
 
-mime={}
+local mime={}
 mime.types = {
 ['ez'] = 'application/andrew-inset',
 ['aw'] = 'application/applixware',
@@ -1005,11 +1005,11 @@ mime.types = {
 
 mime.DefaultType = "application/octet-stream";
 
-mime.GetTypeFromExtension = function(ext)
+function mime.GetTypeFromExtension(ext)
 	return mime.types[ext:lower()] or mime.DefaultType
 end
 
-mime.GetType = function(path)
+function mime.GetType(path)
   return mime.types[path:lower():match("[^.]*$")] or mime.DefaultType
 end
 

@@ -31,7 +31,7 @@ local lshift = bit.lshift
 
 
 
-function strcmp(s1, s2)
+local function strcmp(s1, s2)
 	local s1ptr = ffi.cast("const uint8_t *", s1);
 	local s2ptr = ffi.cast("const uint8_t *", s2);
 
@@ -62,7 +62,7 @@ function strcmp(s1, s2)
 end
 
 
-function strncmp(str1, str2, num)
+local function strncmp(str1, str2, num)
 	local ptr1 = ffi.cast("const uint8_t*", str1)
 	local ptr2 = ffi.cast("const uint8_t*", str2)
 
@@ -76,7 +76,7 @@ function strncmp(str1, str2, num)
 	return 0
 end
 
-function strncasecmp(str1, str2, num)
+local function strncasecmp(str1, str2, num)
 	local ptr1 = ffi.cast("const uint8_t*", str1)
 	local ptr2 = ffi.cast("const uint8_t*", str2)
 
@@ -91,7 +91,7 @@ function strncasecmp(str1, str2, num)
 end
 
 
-function strcasecmp(str1, str2)
+local function strcasecmp(str1, str2)
 	local ptr1 = ffi.cast("const uint8_t*", str1)
 	local ptr2 = ffi.cast("const uint8_t*", str2)
 
@@ -106,7 +106,7 @@ function strcasecmp(str1, str2)
 	return 0
 end
 
-function strlen(str)
+local function strlen(str)
 	local ptr = ffi.cast("uint8_t *", str);
 	local idx = 0
 	while ptr[idx] ~= 0 do
@@ -116,7 +116,7 @@ function strlen(str)
 	return idx
 end
 
-function strndup(str,n)
+local function strndup(str,n)
 	local len = strlen(str)
 	local len = math.min(n,len)
 
@@ -127,7 +127,7 @@ function strndup(str,n)
 	return newstr
 end
 
-function strdup(str)
+local function strdup(str)
 	-- In the case of a Lua string
 	-- create a VLA and initialize
 	if type(str) == "string" then
@@ -146,7 +146,7 @@ function strdup(str)
 	return newstr
 end
 
-function strcpy(dst, src)
+local function strcpy(dst, src)
 	local dstptr = ffi.cast("char *", dst)
 	local srcptr = ffi.cast("const char *", src)
 
@@ -161,7 +161,7 @@ function strcpy(dst, src)
 	return dst;
 end
 
-function strlcpy(dst, src, size)
+local function strlcpy(dst, src, size)
 	local dstptr = ffi.cast("char *", dst)
 	local srcptr = ffi.cast("const char *", src)
 
@@ -174,7 +174,7 @@ function strlcpy(dst, src, size)
 	return len
 end
 
-function strlcat(dst, src, size)
+local function strlcat(dst, src, size)
 	local dstptr = ffi.cast("char *", dst)
 	local srcptr = ffi.cast("const char *", src)
 
@@ -193,7 +193,7 @@ end
 
 
 
-function strchr(s, c)
+local function strchr(s, c)
 	local p = ffi.cast("const char *", s);
 
 	while p[0] ~= c do
@@ -206,7 +206,7 @@ function strchr(s, c)
 	return p
 end
 
-function strrchr(s, c)
+local function strrchr(s, c)
 	local p = ffi.cast("const char *", s);
 	local offset = strlen(p);
 
@@ -220,7 +220,7 @@ function strrchr(s, c)
 	return nil
 end
 
-function strstr(str, target)
+local function strstr(str, target)
 
 	if (target == nil or target[0] == 0) then
 		return str;
@@ -256,7 +256,7 @@ end
 -- Given two null terminated strings
 -- return how many bytes they have in common
 -- this is for prefix matching
-function string_same(a, b)
+local function string_same(a, b)
 	local p1 = ffi.cast("const char *", a);
 	local p2 = ffi.cast("const char *", b);
 
@@ -274,7 +274,7 @@ end
 
 local hex = strdup("0123456789abcdef")
 
-function bin2str(to, p, len)
+local function bin2str(to, p, len)
 --print("bin2str, len: ", len);
 	local off1, off2;
 	while (len > 0) do

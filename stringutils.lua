@@ -1,6 +1,6 @@
 
 
-function gsplit(s,sep)
+local function gsplit(s,sep)
 	return coroutine.wrap(function()
 		if s == '' or sep == '' then coroutine.yield(s) return end
 		local lasti = 1
@@ -12,7 +12,7 @@ function gsplit(s,sep)
 	end)
 end
 
-function iunpack(i,s,v1)
+local function iunpack(i,s,v1)
    local function pass(...)
 	  local v1 = i(s,v1)
 	  if v1 == nil then return ... end
@@ -21,18 +21,18 @@ function iunpack(i,s,v1)
    return pass()
 end
 
-function split(s,sep)
+local function split(s,sep)
    return iunpack(gsplit(s,sep))
 end
 
-function accumulate(t,i,s,v)
+local function accumulate(t,i,s,v)
     for v in i,s,v do
         t[#t+1] = v
     end
     return t
 end
 
-function tsplit(s,sep)
+local function tsplit(s,sep)
    return accumulate({}, gsplit(s,sep))
 end
 

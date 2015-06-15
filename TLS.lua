@@ -4,7 +4,7 @@ local ffi = require ("ffi")
 local BinaryStream = require("BinaryStream")
 
 
-TLS = {}
+local TLS = {}
 
 -- A.1. Record layer
 

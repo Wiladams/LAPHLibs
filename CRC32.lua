@@ -24,7 +24,7 @@ local s_crc32 = ffi.new("const uint32_t[16]", {
 
 local MZ_CRC32_INIT = 0
 
-function mz_crc32(buff, buf_len, crc)
+local function mz_crc32(buff, buf_len, crc)
 	crc = crc or 0
 	local crcu32 = crc;
 	local ptr = ffi.cast("const uint8_t *", buff);

@@ -8,8 +8,8 @@ local bor = bit.bor
 local rshift = bit.rshift
 local lshift = bit.lshift
 
-require "memutils"
-require "stringzutils"
+local mutils = require "memutils"
+local stringz = require "stringzutils"
 
 ffi.cdef[[
 typedef struct MD5Context {
@@ -18,7 +18,7 @@ typedef struct MD5Context {
   unsigned char input[64];
 } MD5_CTX;
 ]]
-MD5_CTX = ffi.typeof("MD5_CTX");
+local MD5_CTX = ffi.typeof("MD5_CTX");
 
 
 function byteReverse(buf, len)
@@ -138,7 +138,7 @@ function MD5Transform(buf, input)
   buf[3] = buf[3] + d;
 end
 
-function MD5Update(ctx, buf, len)
+local function MD5Update(ctx, buf, len)
 	local t;
 
 	t = ctx.bits[0];
@@ -178,7 +178,7 @@ function MD5Update(ctx, buf, len)
 	memcpy(ctx.input, buf, len);
 end
 
-function MD5Final(digest, ctx)
+local function MD5Final(digest, ctx)
 
 	local count;
 	local p;
@@ -211,7 +211,7 @@ function MD5Final(digest, ctx)
 end
 
 
-function md5(luastr)
+local function md5(luastr)
 	local buf = ffi.new("char[33]");
 	local hash = ffi.new("uint8_t[16]");
 	local len = #luastr
@@ -229,5 +229,5 @@ function md5(luastr)
 end
 
 
-
+return md5;
 

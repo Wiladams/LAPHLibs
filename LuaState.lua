@@ -15,7 +15,7 @@ local LuaState_mt = {
 	__index = LuaState_t;
 }
 
-local LuaState = function(codechunk, autorun)
+local function LuaState(codechunk, autorun)
 	local status, result
 	local L = lua.luaL_newstate();  -- create state
 
@@ -53,7 +53,7 @@ local LuaState = function(codechunk, autorun)
 	return obj
 end
 
-LuaState_t.LoadChunk = function(self, codechunk)
+function LuaState_t.LoadChunk(self, codechunk)
 	self.CodeChunk = codechunk
 	local result = lua.luaL_loadstring(self.State, codechunk)
 	report_errors(self.State, result)
@@ -61,7 +61,7 @@ LuaState_t.LoadChunk = function(self, codechunk)
 	return result
 end
 
-LuaState_t.Run = function(self, codechunk)
+function LuaState_t.Run(self, codechunk)
 	codechunk = codechunk or self.CodeChunk
 
 	if not codechunk then

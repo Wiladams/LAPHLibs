@@ -8,19 +8,19 @@ local bnot = bit.bnot
 local rshift = bit.rshift
 
 
-function isset(value, bit)
+local function isset(value, bit)
 	return band(value, 2^bit) > 0
 end
 
-function setbit(value, bit)
+local function setbit(value, bit)
 	return bor(value, 2^bit)
 end
 
-function clearbit(value, bit)
+local function clearbit(value, bit)
 	return band(value, bnot(2^bit))
 end
 
-function numbertobinary(value, nbits, bigendian)
+local function numbertobinary(value, nbits, bigendian)
 	nbits = nbits or 32
 	local res={}
 
@@ -47,7 +47,7 @@ end
 
 
 
-function binarytonumber(str, bigendian)
+local function binarytonumber(str, bigendian)
 	local len = string.len(str)
 	local value = 0
 
@@ -68,7 +68,7 @@ function binarytonumber(str, bigendian)
 	return value
 end
 
-function bytestobinary(bytes, length, offset, bigendian)
+local function bytestobinary(bytes, length, offset, bigendian)
 	offset = offset or 0
 	nbits = 8
 
@@ -88,7 +88,7 @@ function bytestobinary(bytes, length, offset, bigendian)
 	return table.concat(res)
 end
 
-function getbitsvalue(src, lowbit, bitcount)
+local function getbitsvalue(src, lowbit, bitcount)
 	lowbit = lowbit or 0
 	bitcount = bitcount or 32
 
@@ -100,14 +100,14 @@ function getbitsvalue(src, lowbit, bitcount)
 	return rshift(value,lowbit)
 end
 
-function getbitstring(value, lowbit, bitcount)
+local function getbitstring(value, lowbit, bitcount)
 	return numbertobinary(getbitsvalue(value, lowbit, bitcount))
 end
 
 -- Given a bit number, calculate which byte
 -- it would be in, and which bit within that
 -- byte.
-function getbitbyteoffset(bitnumber)
+local function getbitbyteoffset(bitnumber)
 	local byteoffset = math.floor(bitnumber /8)
 	local bitoffset = bitnumber % 8
 
@@ -115,7 +115,7 @@ function getbitbyteoffset(bitnumber)
 end
 
 
-function getbitsfrombytes(bytes, startbit, bitcount)
+local function getbitsfrombytes(bytes, startbit, bitcount)
 	if not bytes then return nil end
 
 	local value = 0
@@ -132,7 +132,7 @@ function getbitsfrombytes(bytes, startbit, bitcount)
 	return value
 end
 
-function setbitstobytes(bytes, startbit, bitcount, value, bigendian)
+local function setbitstobytes(bytes, startbit, bitcount, value, bigendian)
 
 	local byteoffset=0;
 	local bitoffset=0;
@@ -160,3 +160,18 @@ function setbitstobytes(bytes, startbit, bitcount, value, bigendian)
 end
 
 
+local exports = {
+	isset = isset;
+	setbit = setbit;
+	clearbit = clearbit;
+	numbertobinary = numbertobinary;
+	binarytonumber = binarytonumber;
+	bytestobinary = bytestobinary;
+	getbitsvalue = getbitsvalue;
+	getbitstring = getbitstring;
+	getbitbyteoffset = getbitbyteoffset;
+	getbitsfrombytes = getbitsfrombytes;
+	setbitstobytes = setbitstobytes;
+}
+
+return exports

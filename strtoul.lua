@@ -30,7 +30,7 @@ require "cctype"
  */
 --]]
 
-function _strto_l(str, endptr, base, uflag)
+local function _strto_l(str, endptr, base, uflag)
 
     local number = 0;
     local cutoff;
@@ -149,20 +149,28 @@ function _strto_l(str, endptr, base, uflag)
     end
 end
 
-function strtoul(str, endptr, base)
+local function strtoul(str, endptr, base)
 	endptr = endptr or nil
 	base = base or 10
 
     return _strto_l(str, endptr, base, true);
 end
 
-function strtol(str, endptr, base)
+local function strtol(str, endptr, base)
 	endptr = endptr or nil
 	base = base or 10
 
     return _strto_l(str, endptr, base, false);
 end
 
-function atoi(str)
+local function atoi(str)
 	return _strto_l(str, nil, 10, false);
 end
+
+local exports = {
+	strtoul = strtoul;
+	strtol = strtol;
+	atoi = atoi;
+}
+
+return exports

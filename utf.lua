@@ -107,7 +107,7 @@ local function utf8_string_length(utf8string, len)
 	return count
 end
 
-function codepoint_to_utf16(codepoint)
+local function codepoint_to_utf16(codepoint)
 	if codepoint <= 0xffff then
 		return codepoint
 	end
@@ -118,7 +118,7 @@ function codepoint_to_utf16(codepoint)
 	return w1, w2
 end
 
-function utf16_to_codepoint(w1, w2)
+local function utf16_to_codepoint(w1, w2)
 	local cph = lshift((w1 - 0xD7C0), 10)
 	if w2 then
 		cph = cph + w2 - 0xDC00
@@ -128,6 +128,9 @@ function utf16_to_codepoint(w1, w2)
 end
 
 return {
-	Iterator = utf8_string_iterator;
-	StringLength = utf8_string_length;
+	utf8_string_iterator = utf8_string_iterator;
+	
+	utf8_string_length = utf8_string_length;
+	codepoint_to_utf16 = codepoint_to_utf16;
+	utf16_to_codepoint = utf16_to_codepoint;
 }

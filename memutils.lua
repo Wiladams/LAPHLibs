@@ -14,16 +14,16 @@ void free ( void * ptr );
 void * realloc ( void * ptr, size_t size );
 ]]
 
-function bzero(dest, nbytes)
+local function bzero(dest, nbytes)
 	ffi.fill(dest, nbytes)
 	return dest
 end
 
-function bcopy(src, dest, nbytes)
+local function bcopy(src, dest, nbytes)
 	ffi.copy(dest, src, nbytes)
 end
 
-function bcmp(ptr1, ptr2, nbytes)
+local function bcmp(ptr1, ptr2, nbytes)
 	for i=0,nbytes do
 		if ptr1[i] ~= ptr2[i] then return -1 end
 	end
@@ -33,16 +33,16 @@ end
 
 
 
-function memset(dest, c, len)
+local function memset(dest, c, len)
 	ffi.fill(dest, len, c)
 	return dest
 end
 
-function memcpy(dest, src, nbytes)
+local function memcpy(dest, src, nbytes)
 	ffi.copy(dest, src, nbytes)
 end
 
-function memcmp(ptr1, ptr2, nbytes)
+local function memcmp(ptr1, ptr2, nbytes)
 	local p1 = ffi.cast("const uint8_t *", ptr1)
 	local p2 = ffi.cast("const uint8_t *", ptr2)
 
@@ -53,7 +53,7 @@ function memcmp(ptr1, ptr2, nbytes)
 	return 0
 end
 
-function memchr(ptr, value, num)
+local function memchr(ptr, value, num)
 	local p = ffi.cast("const uint8_t *", ptr)
 	for i=0,num-1 do
 		if p[i] == value then return p+i end
@@ -62,7 +62,7 @@ function memchr(ptr, value, num)
 	return nil
 end
 
-function memmove(dst, src, num)
+local function memmove(dst, src, num)
 	local srcptr = ffi.cast("const uint8_t*", src)
 
 	-- If equal, just return

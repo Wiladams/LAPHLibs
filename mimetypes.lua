@@ -1599,7 +1599,7 @@ local mimetypes = {
 {"x-conference","x-cooltalk ice"};
 };
 
-mime = {}
+local mime = {}
 mime.types = mimetypes
 
 mime.default = "application/octet-stream"

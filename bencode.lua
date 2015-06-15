@@ -79,7 +79,7 @@ local encode_funcs = {
 		end,
 }
 
-function encode(x)
+local function encode(x)
 	local tx = type(x)
 	local func = encode_funcs[tx]
 	if not func then
@@ -147,7 +147,7 @@ local function decode_string(s, index)
 end
 
 
-function decode(s, index)
+local function decode(s, index)
 	index = index or 1
 	local t = s:sub(index, index)
 

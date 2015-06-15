@@ -17,7 +17,7 @@ void * realloc ( void * ptr, size_t size );
 -- tell what kind of element it points to
 local function pointerinfo(ptr)
 	local typestr = tostring(ffi.typeof(ptr))
-print("PointerInfo: ", typestr);
+--print("PointerInfo: ", typestr);
 	local elemtype = string.match(typestr, "ctype<(%w+)%s+")
 
 	return elemtype
@@ -26,7 +26,7 @@ end
 -- reallocate a chunk of memory
 local function Realloc(ptr, size)
 	local ptrtype = pointerinfo(ptr);
-print("Realloc: ", ptrtype);
+--print("Realloc: ", ptrtype);
 	local newPtr = ffi.C.realloc(ptr, ffi.sizeof(ptrtype) * size)
 	return newPtr;
 end

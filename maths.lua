@@ -1,10 +1,14 @@
+local floor = math.floor;
+local ceil = math.ceil;
+
 -- because it's not in the standard math library
-function math.round(n)
+
+local function math.round(n)
 	if n >= 0 then
-		return math.floor(n+0.5)
+		return floor(n+0.5)
 	end
 
-	return math.ceil(n-0.5)
+	return ceil(n-0.5)
 end
 
 
