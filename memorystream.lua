@@ -4,23 +4,20 @@ local stream = require "stream"
 
 
 local MemoryStream = {}
+setmetatable(MemoryStream, {
+		__call = function(self, ...)
+		print("MemoryStream:__call")
+		return self:new(...)
+	end,
+})
+
 local MemoryStream_mt = {
 	__index = MemoryStream;
 }
 
-function MemoryStream.new(size, buff, byteswritten)
-	size = size or 8192
-	byteswritten = byteswritten or 0
-	buff = buff or ffi.new("uint8_t[?]", size)
-
-	return MemoryStream.Open(buff, size, byteswritten)
-end
-
-function MemoryStream.Open(buff, bufflen, byteswritten)
+function MemoryStream.init(self, buff, bufflen, byteswritten)
 	if not buff then return nil end
 
-
-	offset = offset or 0
 	byteswritten = byteswritten or 0
 
 	if not bufflen then
@@ -35,7 +32,6 @@ function MemoryStream.Open(buff, bufflen, byteswritten)
 	local obj = {
 		Length = bufflen,
 		Buffer = buff,
-		Offset = offset,
 		Position = 0,
 		BytesWritten = byteswritten,
 		}
@@ -45,33 +41,50 @@ function MemoryStream.Open(buff, bufflen, byteswritten)
 	return obj
 end
 
-function MemoryStream:Reset()
-	self.Offset = 0
+function MemoryStream.new(self, buff, bufflen, byteswritten)
+	return self:init(buff, bufflen, byteswritten);
+end
+
+function MemoryStream.create(self, size, buff, byteswritten)
+	size = size or 8192
+	byteswritten = byteswritten or 0
+	buff = buff or ffi.new("uint8_t[?]", size)
+
+	return self:init(buff, size, byteswritten);
+end
+
+
+
+function MemoryStream:reset()
 	self.Position = 0
 	self.BytesWritten = 0
 end
 
-function MemoryStream:GetLength()
+function MemoryStream:length()
 	return self.Length
 end
 
-function MemoryStream:GetPosition()
+function MemoryStream:position(pos, origin)
+	if pos ~= nil then
+		return self:seek(pos, origin);
+	end
+
 	return self.Position
 end
 
-function MemoryStream:GetRemaining()
+function MemoryStream:remaining()
 	return self.Length - self.Position
 end
 
-function MemoryStream:BytesReadyToBeRead()
+function MemoryStream:bytesReadyToBeRead()
 	return self.BytesWritten - self.Position
 end
 
-function MemoryStream:CanRead()
-	return self:BytesReadyToBeRead() > 0
+function MemoryStream:canRead()
+	return self:bytesReadyToBeRead() > 0
 end
 
-function MemoryStream:Seek(pos, origin)
+function MemoryStream:seek(pos, origin)
 	origin = origin or stream.SEEK_SET
 
 	if origin == stream.SEEK_CUR then
@@ -98,7 +111,7 @@ end
 --]]
 -- The Bytes() function acts as an iterator on bytes
 -- from the stream.
-function MemoryStream:Bytes(maxbytes)
+function MemoryStream:bytes(maxbytes)
 	local buffptr = ffi.cast("const uint8_t *", self.Buffer);
 	local bytesleft = maxbytes or math.huge
 	local pos = -1
@@ -123,7 +136,7 @@ function MemoryStream:Bytes(maxbytes)
 	return closure
 end
 
-function MemoryStream:ReadByte()
+function MemoryStream:readByte()
 	local buffptr = ffi.cast("const uint8_t *", self.Buffer);
 
 	local pos = self.Position
@@ -135,7 +148,7 @@ function MemoryStream:ReadByte()
 	return nil, "eof"
 end
 
-function MemoryStream:ReadBytes(buff, count, offset)
+function MemoryStream:readBytes(buff, count, offset)
 	offset = offset or 0
 
 	local pos = self.Position
@@ -155,7 +168,7 @@ function MemoryStream:ReadBytes(buff, count, offset)
 	return maxbytes
 end
 
-function MemoryStream:ReadString(count)
+function MemoryStream:readString(count)
 	local pos = self.Position
 	local remaining = self.Length - pos
 
@@ -176,10 +189,10 @@ end
 local CR = string.byte("\r")
 local LF = string.byte("\n")
 
-function MemoryStream:ReadLine(maxbytes)
+function MemoryStream:readLine(maxbytes)
 --print("-- MemoryStream:ReadLine()");
 
-	local readytoberead = self:BytesReadyToBeRead()
+	local readytoberead = self:bytesReadyToBeRead()
 
 	maxbytes = maxbytes or readytoberead
 
@@ -195,7 +208,7 @@ function MemoryStream:ReadLine(maxbytes)
 --print("-- MemoryStream:ReadLine(), maxlen: ", maxlen);
 
 	for n=1, maxlen do
-		abyte, err = self:ReadByte()
+		abyte, err = self:readByte()
 		if not abyte then
 			break
 		end
@@ -227,7 +240,7 @@ end
 	Writing interface
 --]]
 
-function MemoryStream:WriteByte(byte)
+function MemoryStream:writeByte(byte)
 	-- don't write a nil value
 	-- a nil is not the same as a '0'
 	if not byte then return end
@@ -247,7 +260,7 @@ function MemoryStream:WriteByte(byte)
 	return false
 end
 
-function MemoryStream:WriteBytes(buff, count, offset)
+function MemoryStream:writeBytes(buff, count, offset)
 	offset = offset or 0
 	local pos = self.Position
 	local size = self.Length
@@ -272,7 +285,7 @@ function MemoryStream:WriteBytes(buff, count, offset)
 	return maxbytes;
 end
 
-function MemoryStream:WriteString(str, count, offset)
+function MemoryStream:writeString(str, count, offset)
 	offset = offset or 0
 	count = count or #str
 
@@ -288,7 +301,7 @@ end
 	Start from the current position in the current stream
 --]]
 
-function MemoryStream:WriteStream(stream, size)
+function MemoryStream:writeStream(stream, size)
 	local count = 0
 	local abyte = stream:ReadByte()
 	while abyte and count < size do
@@ -300,7 +313,7 @@ function MemoryStream:WriteStream(stream, size)
 	return count
 end
 
-function MemoryStream:WriteLine(line)
+function MemoryStream:writeLine(line)
 	local status, err
 
 	if line then
@@ -320,7 +333,7 @@ end
 	Moving big chunks around
 --]]
 
-function MemoryStream:CopyTo(stream)
+function MemoryStream:copyTo(stream)
 	-- copy from the beginning
 	-- to the current position
 	local remaining = self.BytesWritten
@@ -336,7 +349,7 @@ end
 --[[
 	Utility
 --]]
-function MemoryStream:ToString()
+function MemoryStream:toString()
 	local len = self.Position
 
 	if len > 0 then

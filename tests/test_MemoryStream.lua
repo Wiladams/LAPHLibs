@@ -1,24 +1,24 @@
 package.path = package.path..";../?.lua";
 
-local MemoryStream = require "MemoryStream"
-local Stream = require "Stream"
+local MemoryStream = require "memorystream"
+local Stream = require "stream"
 
 function printStreamState(stream)
-	print(stream:GetLength())
-	print(stream:GetPosition())
+	print(stream:length())
+	print(stream:position())
 end
 
 function test_ReadStream()
-	local rstream = MemoryStream.new(1024)
+	local rstream = MemoryStream:create(1024)
 	printStreamState(rstream);
 
-	rstream:Seek(0, Stream.SEEK_END)
+	rstream:seek(0, Stream.SEEK_END)
 	printStreamState(rstream);
 end
 
 
 function test_WriteReadStream()
-	local stream = MemoryStream.new(15)
+	local stream = MemoryStream:create(15)
 
 	local written = stream:WriteString("William A ")
 	print("Written: ", written);
@@ -39,8 +39,8 @@ end
 
 
 function test_ReadWrite()
-	local mstream1 = MemoryStream.new()
-	local mstream2 = MemoryStream.new()
+	local mstream1 = MemoryStream:create()
+	local mstream2 = MemoryStream:create()
 
 -- write something into first memory stream
 local tst_string = "Hello There"
@@ -71,17 +71,17 @@ Fifth
 And finally the sixth.
 ]]
 
-	local mstream = MemoryStream.Open(str, #str, #str)
+	local mstream = MemoryStream(str, #str, #str)
 
 	repeat
-		local line, err = mstream:ReadLine()
+		local line, err = mstream:readLine()
 		print(string.format("LINE:'%s'", tostring(line)), err);
 	until err == "eof"
 end
 
 
 function test_ReadLine()
-	local mstream = MemoryStream.new(1024)
+	local mstream = MemoryStream:create(1024)
 
 	mstream:WriteString("This is the first line\r\n")
 	mstream:WriteString("And the second")
@@ -94,13 +94,13 @@ function test_ReadLine()
 	mstream:Seek(0)
 
 	repeat
-		local line, err = mstream:ReadLine()
+		local line, err = mstream:readLine()
 		print(string.format("LINE:'%s'", tostring(line)), err);
 	until err == "eof"
 end
 
 function test_Byte_Iterator()
-	local mstream = MemoryStream.new();
+	local mstream = MemoryStream:create();
 
 	mstream:WriteString("This is the first line\r\n")
 	mstream:WriteString("And the second")
@@ -110,12 +110,12 @@ function test_Byte_Iterator()
 	mstream:WriteString("Fifth\n");
 	mstream:WriteString("And finally the sixth.");
 
-	for abyte in mstream:Bytes() do
+	for abyte in mstream:bytes() do
 		io.write(string.char(abyte))
 	end
 
 	-- Iterate the first 4 bytes
-	for abyte in mstream:Bytes(4) do
+	for abyte in mstream:bytes(4) do
 		io.write(string.char(abyte))
 	end
 end

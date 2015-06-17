@@ -2,7 +2,7 @@ package.path = package.path..";..\\?.lua";
 
 local ffi = require "ffi"
 
-local CVec = require "CVec"
+local CVec = require "cvec"
 local Vector = require "Vector"
 
 function test_intvec()

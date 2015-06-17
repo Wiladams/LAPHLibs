@@ -1,14 +1,17 @@
+local exports = {}
+
 if not stdc_included then
 stdc_included = true
 
-require "c99_types"
-require "cctype"
-require "limits"
-require "memutils"
+print("std_cinclude")
 
 
-return {
-	memutils = require "memutils",
-	stringz = require "stringzutils",
-}
+exports.c99_types = require "c99_types";
+exports.cctype = require("cctype");
+exports.limits = require("limits");
+exports.memutils = require "memutils";
+exports.stringz = require "stringzutils";
+
 end
+
+return exports

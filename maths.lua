@@ -3,7 +3,7 @@ local ceil = math.ceil;
 
 -- because it's not in the standard math library
 
-local function math.round(n)
+local function round(n)
 	if n >= 0 then
 		return floor(n+0.5)
 	end
@@ -11,4 +11,8 @@ local function math.round(n)
 	return ceil(n-0.5)
 end
 
+local exports = {
+	round = round;
+}
 
+return exports;
