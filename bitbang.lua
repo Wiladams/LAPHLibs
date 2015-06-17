@@ -8,6 +8,7 @@ local bnot = bit.bnot
 local rshift = bit.rshift
 
 
+
 local function isset(value, bit)
 	return band(value, 2^bit) > 0
 end
@@ -159,6 +160,87 @@ local function setbitstobytes(bytes, startbit, bitcount, value, bigendian)
 	return bytes
 end
 
+local function extractbits32(src, lowbit, bitcount)
+	-- create a mask which matches the desired range
+	-- of bits
+	local mask = 0xffffffff
+	mask = lshift(mask, bitcount)
+	mask = bnot(mask)
+	mask = lshift(mask, lowbit)
+
+	-- use the mask, and a shift to get the desired
+	-- value
+	local value = rshift(band(mask, src), lowbit)
+	return value;
+end
+
+local function extractbits64(src, lowbit, bitcount)
+	-- create a mask which matches the desired range
+	-- of bits
+	local mask = 0xffffffffffffffffULL
+	mask = lshift(mask, bitcount)
+	mask = bnot(mask)
+	mask = lshift(mask, lowbit)
+
+	-- use the mask, and a shift to get the desired
+	-- value
+	local value = rshift(band(mask, src), lowbit)
+	return value;
+end
+
+local function setbits32(dst, lowbit, bitcount, value)
+	-- make a whole where the value will be
+	local mask = 0xffffffff
+	mask = lshift(mask, bitcount)
+	mask = bnot(mask)
+
+	-- while we're at it, ensure the value fits
+	-- within the bitcount
+	value = band(mask, value)
+
+	-- shift the whole, and flip it back
+	-- to zeros everywhere but the hole
+	mask = lshift(mask, lowbit)
+	mask = bnot(mask)
+
+	local newvalue = band(dst, mask)
+
+
+	-- now take the value, and shift it by the lowbit
+	value = lshift(value, lowbit)
+
+	-- finally, stick it in the destination
+	dst = bor(newvalue, value)
+
+	return dst
+end
+
+local function setbits64(dst, lowbit, bitcount, value)
+	-- make a whole where the value will be
+	local mask = 0xffffffffffffffffULL
+	mask = lshift(mask, bitcount)
+	mask = bnot(mask)
+
+	-- while we're at it, ensure the value fits
+	-- within the bitcount
+	value = band(mask, value)
+
+	-- shift the whole, and flip it back
+	-- to zeros everywhere but the hole
+	mask = lshift(mask, lowbit)
+	mask = bnot(mask)
+
+	local newvalue = band(dst, mask)
+
+
+	-- now take the value, and shift it by the lowbit
+	value = lshift(value, lowbit)
+
+	-- finally, stick it in the destination
+	dst = bor(newvalue, value)
+
+	return dst
+end
 
 local exports = {
 	isset = isset;
@@ -172,6 +254,12 @@ local exports = {
 	getbitbyteoffset = getbitbyteoffset;
 	getbitsfrombytes = getbitsfrombytes;
 	setbitstobytes = setbitstobytes;
+
+	extractbits32 = extractbits32;
+	extractbits64 = extractbits64;
+
+	setbits32 = setbits32;
+	setbits64 = setbits64;
 }
 
 return exports
