@@ -6,7 +6,6 @@ local stream = require "stream"
 local MemoryStream = {}
 setmetatable(MemoryStream, {
 		__call = function(self, ...)
-		print("MemoryStream:__call")
 		return self:new(...)
 	end,
 })
@@ -17,17 +16,9 @@ local MemoryStream_mt = {
 
 function MemoryStream.init(self, buff, bufflen, byteswritten)
 	if not buff then return nil end
+	if not bufflen then return nil end
 
 	byteswritten = byteswritten or 0
-
-	if not bufflen then
-		if type(buff) == "string" then
-			bufflen = #buff
-		elseif type(buff) == "ctype" then
-			bufflen = ffi.sizeof(buff)
-		end
-	end
-
 
 	local obj = {
 		Length = bufflen,
@@ -41,18 +32,48 @@ function MemoryStream.init(self, buff, bufflen, byteswritten)
 	return obj
 end
 
-function MemoryStream.new(self, buff, bufflen, byteswritten)
+-- MemoryStream constructors
+--
+-- MemoryStream:new(8192)	-- Create a buffer with 8192 bytes
+-- MemoryStream:new("string" [, len])	-- create a buffer atop some lua string
+-- MemoryStream:new(cdata, len)			-- create a buffer atop some cdata structure with length
+
+function MemoryStream.new(self, ...)
+	local buff = nil;
+	local bufflen = nil;
+	local byteswritten = 0;
+
+	local nargs = select('#', ...);
+
+	if nargs == 1 then
+		if type(select(1, ...)=="number") then
+			bufflen = select(1,...);
+			buff = ffi.new("uint8_t[?]", bufflen)
+			byteswritten = 0
+		elseif type(select(1,...)=="string") then
+			buff = select(1, ...);
+			bufflen = #buff;
+			byteswritten = bufflen;
+		end
+	elseif nargs == 2 then
+		if type(select(1, ...))=="string" then
+			if type(select(2,...)) ~= "number" then
+				return nil;
+			end
+
+			buff = select(1,...);
+			bufflen = #buff;
+			byteswritten = bufflen;
+		elseif type(select(1,...))=="ctype" then
+			buff = select(1,...);
+			bufflen = ffi.sizeof(buff);
+			byteswritten = bufflen;
+		end
+	end
+
+
 	return self:init(buff, bufflen, byteswritten);
 end
-
-function MemoryStream.create(self, size, buff, byteswritten)
-	size = size or 8192
-	byteswritten = byteswritten or 0
-	buff = buff or ffi.new("uint8_t[?]", size)
-
-	return self:init(buff, size, byteswritten);
-end
-
 
 
 function MemoryStream:reset()
@@ -291,7 +312,7 @@ function MemoryStream:writeString(str, count, offset)
 
 	--print("-- MemoryStream:WriteString():", str);
 
-	return self:WriteBytes(str, count, offset)
+	return self:writeBytes(str, count, offset)
 end
 
 --[[
@@ -303,11 +324,11 @@ end
 
 function MemoryStream:writeStream(stream, size)
 	local count = 0
-	local abyte = stream:ReadByte()
+	local abyte = stream:readByte()
 	while abyte and count < size do
-		self:WriteByte(abyte)
+		self:writeByte(abyte)
 		count = count + 1
-		abyte = stream:ReadByte()
+		abyte = stream:readByte()
 	end
 
 	return count
@@ -317,14 +338,14 @@ function MemoryStream:writeLine(line)
 	local status, err
 
 	if line then
-		status, err = self:WriteString(line)
+		status, err = self:writeString(line)
 		if err then
 			return nil, err
 		end
 	end
 
 	-- write the terminator
-	status, err = self:WriteString("\r\n");
+	status, err = self:writeString("\r\n");
 
 	return status, err
 end
@@ -340,7 +361,7 @@ function MemoryStream:copyTo(stream)
 	local byteswritten = 0
 
 	while (byteswritten < remaining) do
-		byteswritten = byteswritten + stream:WriteBytes(self.Buffer, self.Position, byteswritten)
+		byteswritten = byteswritten + stream:writeBytes(self.Buffer, self.Position, byteswritten)
 	end
 end
 
