@@ -20,26 +20,34 @@ end
 function test_WriteReadStream()
 	print("==== test_WriteReadStream ====")
 	local stream = MemoryStream(15)
+	local str = "William A ";
+	print("-- Space Remaining: ", stream:remaining())
+	print(string.format("Writing: '%s' [%d]", str, #str));
+	local written = stream:writeString(str)
+	print("-- Bytes Written: ", written);
 
-	local written = stream:writeString("William A ")
-	print("Written: ", written);
-	written = stream:writeString("William A ")
-	print("Written: ", written);
+	print("-- Space Remaining: ", stream:remaining())
+	print(string.format("Writing: '%s' [%d]", str, #str));
+	written = stream:writeString(str)
+	print("-- Bytes Written: ", written);
 
 	stream:seek(0);
 
+	print("-- Chars in Stream")
 	local c=stream:readByte()
 	while (c and c ~= 0) do
 		print(string.char(c))
 		c=stream:readByte()
 	end
 
+	print("-- seek(1), readString(6)")
 	stream:seek(1)
 	io.write("'",stream:readString(6),"'\n")
 end
 
 
 function test_ReadWrite()
+	print("==== test_ReadWrite ====")
 	local mstream1 = MemoryStream(8192)
 	local mstream2 = MemoryStream(8192)
 
@@ -63,6 +71,8 @@ function test_ReadWrite()
 end
 
 function test_ReadOnly()
+	print("==== test_ReadOnly ====")
+	
 local str = [[
 This is the first line
 And the second and third combined
