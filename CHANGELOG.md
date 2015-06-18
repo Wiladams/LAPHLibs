@@ -12,10 +12,11 @@ A few additions
 	alt_getopt.lua - the most posix compliant
 
 Moved
-	removed mrandom.lua
-	moved strtoul.lua to experimental
-	moved arena.lua to experimental
-	moved cvec.lua to experimental
+-----
+	*removed mrandom.lua
+	*moved strtoul.lua to experimental
+	*moved arena.lua to experimental
+	*moved cvec.lua to experimental
 
 stringzutils.lua 
 	made all functions module local
