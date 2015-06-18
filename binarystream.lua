@@ -24,13 +24,10 @@ local ffi = require "ffi"
 local bit = require "bit"
 local bswap = bit.bswap
 
-local BinaryStream = {}
-local BinaryStream_mt = {
-	__index = BinaryStream;
-}
+
 
 ffi.cdef[[
-typedef union  {
+typedef union  bstream_types_t {
 		uint8_t		Byte;
 		int16_t 	Int16;
 		uint16_t	UInt16;
@@ -45,10 +42,26 @@ typedef union  {
 ]]
 local bstream_types_t = ffi.typeof("bstream_types_t")
 
---local types_buffer = bstream_types_t();
+
+--[[
+	stream - a stream that we will wrap
+	
+	bigendian - tells us what format the data within the 
+	  wrapped stream is in.
+--]]
+local BinaryStream = {}
+setmetatable(BinaryStream, {
+	__call = function (self, ...)
+		return self:new(...);
+	end,
+})
+
+local BinaryStream_mt = {
+	__index = BinaryStream;
+}
 
 
-function BinaryStream.new(stream, bigendian)
+function BinaryStream.init(self, stream, bigendian)
 	local obj = {
 		Stream = stream,
 		BigEndian = bigendian,
@@ -61,15 +74,19 @@ function BinaryStream.new(stream, bigendian)
 	return obj
 end
 
-function BinaryStream:ReadByte()
-	return self.Stream:ReadByte()
+function BinaryStream.new(self, stream, bigendian)
+	return self:init(stream, bigendian);
 end
 
-function BinaryStream:ReadInt16()
+function BinaryStream:readByte()
+	return self.Stream:readByte()
+end
+
+function BinaryStream:readInt16()
 
 	-- Read two bytes
 	-- return nil if two bytes not read
-	if (self.Stream:ReadBytes(self.types_buffer.bytes, 2, 0) <2)
+	if (self.Stream:readBytes(self.types_buffer.bytes, 2, 0) <2)
 		then return nil
 	end
 
@@ -86,11 +103,11 @@ function BinaryStream:ReadInt16()
 	return self.self.types_buffer.Int16;
 end
 
-function BinaryStream:ReadUInt16()
+function BinaryStream:readUInt16()
 
 	-- Read two bytes
 	-- return nil if two bytes not read
-	if (self.Stream:ReadBytes(self.types_buffer.bytes, 2, 0) <2)
+	if (self.Stream:readBytes(self.types_buffer.bytes, 2, 0) <2)
 		then return nil
 	end
 
@@ -107,10 +124,10 @@ function BinaryStream:ReadUInt16()
 	return self.types_buffer.UInt16;
 end
 
-function BinaryStream:ReadInt32()
+function BinaryStream:readInt32()
 
 	-- Read four bytes
-	if (self.Stream:ReadBytes(self.types_buffer.bytes, 4, 0) <4)
+	if (self.Stream:readBytes(self.types_buffer.bytes, 4, 0) <4)
 		then return nil
 	end
 
@@ -137,10 +154,10 @@ function BinaryStream:ReadInt32()
 --]]
 end
 
-function BinaryStream:ReadUInt32()
+function BinaryStream:readUInt32()
 
 	-- Read four bytes
-	if (self.Stream:ReadBytes(self.types_buffer.bytes, 4, 0) <4) then
+	if (self.Stream:readBytes(self.types_buffer.bytes, 4, 0) <4) then
 		return nil
 	end
 
@@ -166,7 +183,7 @@ end
 
 function BinaryStream:ReadInt64()
 	-- Read eight bytes
-	if (self.Stream:ReadBytes(self.types_buffer.bytes, 8, 0) <8)
+	if (self.Stream:readBytes(self.types_buffer.bytes, 8, 0) <8)
 		then return nil
 	end
 
@@ -197,9 +214,9 @@ function BinaryStream:ReadInt64()
 	return tonumber(self.types_buffer.Int64);
 end
 
-function BinaryStream:ReadUInt64()
+function BinaryStream:readUInt64()
 	-- Read eight bytes
-	if (self.Stream:ReadBytes(self.types_buffer.bytes, 8, 0) <8)
+	if (self.Stream:readBytes(self.types_buffer.bytes, 8, 0) <8)
 		then return nil
 	end
 
@@ -232,18 +249,15 @@ end
 --[[
 	Assuming IEEE format for 4-byte floats
 --]]
-function BinaryStream:ReadSingle()
-	-- determine if we need to do any swapping
-	local needswap = self.BigEndian == ffi.abi("le")
-
+function BinaryStream:readSingle()
 	-- Read four bytes
-	if (self.Stream:ReadBytes(self.types_buffer.bytes, 4, 0) <4)
+	if (self.Stream:readBytes(self.types_buffer.bytes, 4, 0) <4)
 		then return nil
 	end
 
 	-- if we don't need to do any swapping, then
 	-- we can just return the value right away
-	if not needswap then
+	if not self.NeedSwap then
 		return self.types_buffer.Single;
 	end
 
@@ -263,9 +277,9 @@ function BinaryStream:ReadSingle()
 	return self.types_buffer.Single;
 end
 
-function BinaryStream:ReadDouble()
+function BinaryStream:readDouble()
 	-- Read eight bytes
-	if (self.Stream:ReadBytes(self.types_buffer.bytes, 8, 0) <8)
+	if (self.Stream:readBytes(self.types_buffer.bytes, 8, 0) <8)
 		then return nil
 	end
 
@@ -295,8 +309,8 @@ function BinaryStream:ReadDouble()
 	return tonumber(self.types_buffer.Double);
 end
 
-function BinaryStream:ReadBytes(buffer, size, offset)
-	return self.Stream:ReadBytes(buffer, size, offset)
+function BinaryStream:readBytes(buffer, size, offset)
+	return self.Stream:readBytes(buffer, size, offset)
 end
 
 
@@ -304,19 +318,19 @@ end
 
 
 
-function BinaryStream:WriteByte(value)
-	return self.Stream:WriteByte(value) == 1;
+function BinaryStream:writeByte(value)
+	return self.Stream:writeByte(value) == 1;
 end
 
-function BinaryStream:WriteBytes(buff, length, offset)
-	return self.Stream:WriteBytes(buff, length, offset);
+function BinaryStream:writeBytes(buff, length, offset)
+	return self.Stream:writeBytes(buff, length, offset);
 end
 
-function BinaryStream:WriteInt16(value)
+function BinaryStream:writeInt16(value)
 	self.types_buffer.Int16 = value
 
 	if not self.NeedSwap then
-		return self.Stream:WriteBytes(self.types_buffer.bytes, 2, 0) == 2
+		return self.Stream:writeBytes(self.types_buffer.bytes, 2, 0) == 2
 	end
 
 	-- Need to swap bytes
@@ -324,26 +338,26 @@ function BinaryStream:WriteInt16(value)
 	self.types_buffer.bytes[0] = self.types_buffer.bytes[1]
 	self.types_buffer.bytes[1] = tmp
 
-	return self.Stream:WriteBytes(self.types_buffer.bytes, 2, 0) == 2
+	return self.Stream:writeBytes(self.types_buffer.bytes, 2, 0) == 2
 end
 
-function BinaryStream:WriteInt32(value)
+function BinaryStream:writeInt32(value)
 	self.types_buffer.Int32 = value
 
 	if not self.NeedSwap then
-		return self.Stream:WriteBytes(self.types_buffer.bytes, 4, 0) == 4
+		return self.Stream:writeBytes(self.types_buffer.bytes, 4, 0) == 4
 	end
 
 	self.types_buffer.Int32 = bswap(self.types_buffer.Int32)
 
-	return self.Stream:WriteBytes(self.types_buffer.bytes, 4, 0) == 4
+	return self.Stream:writeBytes(self.types_buffer.bytes, 4, 0) == 4
 end
 
-function BinaryStream:WriteInt64(value)
+function BinaryStream:writeInt64(value)
 	self.types_buffer.Int64 = value
 
 	if not self.NeedSwap then
-		return self.Stream:WriteBytes(self.types_buffer.bytes, 8, 0) == 8
+		return self.Stream:writeBytes(self.types_buffer.bytes, 8, 0) == 8
 	end
 
 
@@ -364,14 +378,14 @@ function BinaryStream:WriteInt64(value)
 	self.types_buffer.bytes[4] = tmp;
 
 
-	return self.Stream:WriteBytes(self.types_buffer.bytes, 8, 0) == 8
+	return self.Stream:writeBytes(self.types_buffer.bytes, 8, 0) == 8
 end
 
-function BinaryStream:WriteSingle(value)
+function BinaryStream:writeSingle(value)
 	self.types_buffer.Single = value
 
 	if not self.NeedSwap then
-		return self.Stream:WriteBytes(self.types_buffer.bytes, 4, 0) == 4
+		return self.Stream:writeBytes(self.types_buffer.bytes, 4, 0) == 4
 	end
 
 	local tmp = self.types_buffer.bytes[0];
@@ -382,14 +396,14 @@ function BinaryStream:WriteSingle(value)
 	self.types_buffer.bytes[2] = tmp;
 
 
-	return self.Stream:WriteBytes(self.types_buffer.bytes, 4, 0) == 4
+	return self.Stream:writeBytes(self.types_buffer.bytes, 4, 0) == 4
 end
 
-function BinaryStream:WriteDouble(value)
+function BinaryStream:writeDouble(value)
 	self.types_buffer.Double = value
 
 	if not self.NeedSwap then
-		return self.Stream:WriteBytes(self.types_buffer.bytes, 8, 0) == 8
+		return self.Stream:writeBytes(self.types_buffer.bytes, 8, 0) == 8
 	end
 
 	local tmp = self.types_buffer.bytes[0];
@@ -409,7 +423,7 @@ function BinaryStream:WriteDouble(value)
 	self.types_buffer.bytes[4] = tmp;
 
 
-	return self.Stream:WriteBytes(self.types_buffer.bytes, 8, 0) == 8
+	return self.Stream:writeBytes(self.types_buffer.bytes, 8, 0) == 8
 end
 
 return BinaryStream;

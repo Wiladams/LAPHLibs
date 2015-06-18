@@ -7,22 +7,8 @@ local rshift = bit.rshift
 local lshift = bit.lshift
 
 local memutils = require "memutils"
+local maths = require("maths")
 
-
-
--- round up to the nearest
--- power of 2
-local function kv_roundup32(x) 
-	x = x - 1; 
-	x = bor(x,rshift(x,1)); 
-	x = bor(x,rshift(x,2)); 
-	x = bor(x,rshift(x,4)); 
-	x = bor(x,rshift(x,8)); 
-	x = bor(x,rshift(x,16)); 
-	x = x + 1;
-	
-	return x
-end
 
 
 local Vector = {}
@@ -90,7 +76,7 @@ function Vector.a(v, i)
 	if v.Capacity <= i then						
 		v.Capacity = i + 1; 
 		v.n = i + 1;
-		v.Capacity = kv_roundup32(v.Capacity) 
+		v.Capacity = maths.roundup(v.Capacity) 
 		self:Realloc(v.Capacity) 
 	else
 		if v.n <= i then 

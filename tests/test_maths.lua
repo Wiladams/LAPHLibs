@@ -16,7 +16,7 @@ local function test_poweroftwo()
 		print(i, value, pow(2, i), isPowerOfTwo(value))
 	end
 
-	for i=1,32 do
+	for i=0,32 do
 		print(i, isPowerOfTwo(i))
 	end
 

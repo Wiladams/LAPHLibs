@@ -12,6 +12,7 @@ local sort, concat = table.sort, table.concat
 local pairs, ipairs, type = pairs, ipairs, type
 local tonumber = tonumber
 
+local exports = {}
 
 local function islist(t)
 	local n = #t
@@ -54,7 +55,7 @@ local encode_funcs = {
 			if islist(x) then
 				table.insert(ret, "l")
 				for k, v in ipairs(x) do
-					table.insert(ret, encode(v))
+					table.insert(ret, exports.encode(v))
 				end
 				table.insert(ret,"e")
 			else -- dictionary
@@ -70,8 +71,8 @@ local encode_funcs = {
 				sort(sortedkeys)
 
 				for k, v in ipairs(sortedkeys) do
-					table.insert(ret,encode(v))
-					table.insert(ret,encode(x[v]))
+					table.insert(ret,exports.encode(v))
+					table.insert(ret,exports.encode(x[v]))
 				end
 				table.insert(ret,"e")
 			end
@@ -79,7 +80,7 @@ local encode_funcs = {
 		end,
 }
 
-local function encode(x)
+function exports.encode(x)
 	local tx = type(x)
 	local func = encode_funcs[tx]
 	if not func then
@@ -109,7 +110,7 @@ local function decode_list(s, index)
 	local t = {}
 	while s:sub(index, index) ~= "e" do
 		local obj
-		obj, index = decode(s, index)
+		obj, index = exports.decode(s, index)
 		t[#t + 1] = obj
 	end
 	index = index + 1
@@ -122,9 +123,9 @@ local function decode_dictionary(s, index)
 
 	while s:sub(index, index) ~= "e" do
 		local obj1
-		obj1, index = decode(s, index)
+		obj1, index = exports.decode(s, index)
 		local obj2
-		obj2, index = decode(s, index)
+		obj2, index = exports.decode(s, index)
 		t[obj1] = obj2
 	end
 	index = index + 1
@@ -147,7 +148,7 @@ local function decode_string(s, index)
 end
 
 
-local function decode(s, index)
+function exports.decode(s, index)
 	index = index or 1
 	local t = s:sub(index, index)
 
@@ -168,7 +169,4 @@ local function decode(s, index)
 	end
 end
 
-return {
-	encode = encode,
-	decode = decode,
-}
+return exports

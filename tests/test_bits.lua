@@ -1,12 +1,16 @@
-package.path = package.path..";..\\?.lua";
+package.path = package.path..";../?.lua";
 
 local ffi = require "ffi"
 
-require "BitBang"
-
+local bitbang = require "bitbang"
+-- make them global
+for k,v in pairs(bitbang) do
+	_G[k] = v;
+end
 
 
 function test_booleanstring()
+	print("==== test_booleanstring ====")
     print("4: ", numbertobinary(4, 8))
     print("8: ", numbertobinary(8, 8))
     print("0x0f: ", numbertobinary(0x0f, 16))
@@ -14,6 +18,7 @@ function test_booleanstring()
 end
 
 function test_stringtonumber()
+	print("==== test_stringtonumber ====")
 	print(binarytonumber(numbertobinary(4,8)))
 	print(binarytonumber(numbertobinary(8,8)))
 	print(binarytonumber(numbertobinary(0x0f,16)))
@@ -21,52 +26,31 @@ function test_stringtonumber()
 end
 
 function test_bitstring()
+	print("==== test_bitstring ====")
+--local function numbertobinary(value, nbits, bigendian)
+
+    print("1: ", numbertobinary(1, 4,true))
+    print("3: ", numbertobinary(3, 4,true))
+
     print("1: ", getbitstring(1, 0,4))
     print("2: ", getbitstring(3, 0,2))
 	print("6:3 - ",getbitstring(6, 1,2))
 end
 
 function test_getbitsvalue()
-	print(getbitsvalue(0, 0, 8))
-	print(getbitsvalue(3, 0, 8))
-	print(getbitsvalue(6, 1, 8))
-	print(getbitsvalue(0xff, 0, 8))
+	print("==== test_getbitsvalue ====")
+	print("0", getbitsvalue(0, 0, 8))
+	print("3", getbitsvalue(3, 0, 8))
+	print("3", getbitsvalue(6, 1, 8))
+	print("255", getbitsvalue(0xff, 0, 8))
 
 	local bin1 = "11000000"
-	local n1 = binarytonumber(bin1)
+	local n1 = binarytonumber(bin1) -- little endian by default
 
-	print("Binary 3: ", getbitsvalue(n1, 6, 2))
+	print("Binary 3: ", getbitsvalue(n1, 0, 2))
 end
 
-function test_bitbytes()
-	local value = 3.7;
-	local bt = bittypes();
 
-	bt.f = 3.7;
-	print("float 3.7: ", bytestobinary(bt.b, 4, 0))
-
-	bt.Int = 3;
-	print("int 3: ", bytestobinary(bt.b, 4, 0))
-
-	bt.Short = -10;
-	print("Short -10: ", bytestobinary(bt.b, 2, 0))
-
-	bt.Short = bit.arshift(-10,2);
-	print("arshift Short -10, 2: ", bytestobinary(bt.b, 2, 0))
-
-	bt.Short = bit.rshift(-10,2);
-	print("rshift Short -10, 2: ", bytestobinary(bt.b, 2, 0))
-
-	bt.Short = 10;
-	print("Short 10: ", bytestobinary(bt.b, 2, 0))
-
-	bt.Short = rshift(10,1);
-	print("rshift Short 10,1: ", bytestobinary(bt.b, 2, 0))
-
-	bt.Short = bit.arshift(10,2);
-	print("arshift Short 10,2: ", bytestobinary(bt.b, 2, 0))
-
-end
 
 function test_modulus()
 	print("1 % 8: ", 1 % 8);
@@ -140,15 +124,15 @@ function test_swap()
 	print("stream BE: true  hostle: false", true == false);
 end
 
---test_booleanstring()
+test_booleanstring()
 --test_stringtonumber()
---test_bitstring();
---test_getbitsvalue();
---test_bitbytes();
+test_bitstring();
+test_getbitsvalue();
+test_bitbytes();
 --test_modulus();
 --test_bitsfrombytes();
 
 
 --test_clearbit()
 
-test_swap();
+--test_swap();

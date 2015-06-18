@@ -4,17 +4,19 @@ local bit = require "bit"
 local bor = bit.bor
 local rshift = bit.rshift
 local lshift = bit.lshift
+local memutils = require("memutils")
 
-local C = ffi.C
 
---[=[
-ffi.cdef[[
-void * malloc ( size_t size );
-void free ( void * ptr );
-void * realloc ( void * ptr, size_t size );
-]]
---]=]
+--[[
+	BUGBUG 
 
+	DONT USE THIS!!
+	This actually won't work because of the mix of 
+	memory handlers.  __new uses ffi.new, and Realloc
+	uses ffi.C.realloc
+
+
+--]]
 -- given a pointer
 -- tell what kind of element it points to
 local function pointerinfo(ptr)
@@ -34,19 +36,6 @@ local function Realloc(ptr, size)
 end
 
 
--- round up to the nearest
--- power of 2
-local function kv_roundup32(x)
-	x = x - 1;
-	x = bor(x,rshift(x,1));
-	x = bor(x,rshift(x,2));
-	x = bor(x,rshift(x,4));
-	x = bor(x,rshift(x,8));
-	x = bor(x,rshift(x,16));
-	x = x + 1;
-
-	return x
-end
 
 local kvec_mt = {
 	__new = function(ct, capacity)
@@ -95,7 +84,7 @@ local kvec_mt = {
 			if v.Capacity <= i then
 				v.Capacity = i + 1;
 				v.n = i + 1;
-				v.Capacity = kv_roundup32(v.Capacity)
+				v.Capacity = maths.roundup(v.Capacity)
 				v:Realloc(v.Capacity)
 			else
 				if v.n <= i then

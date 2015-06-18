@@ -1,5 +1,6 @@
 local bit = require("bit")
-local band, rshift = bit.band, bit.rshift
+local band, bor = bit.band, bit.bor 
+local rshift, lshift = bit.rshift, bit.lshift
 
 local floor = math.floor;
 local ceil = math.ceil;
@@ -14,20 +15,31 @@ local function round(n)
 end
 
 local function is_power_of_two(value)
-    if value == 0 then
+	if value == 0 then
 		return false;
 	end
 
-    while (band(value, 1) == 0) do
-		value = rshift(value, 1);
-    end
+	return band(value, (value-1)) == 0;
+end
 
-    return value == 1;
+-- round up to the nearest
+-- power of 2
+local function roundup32(x) 
+	x = x - 1; 
+	x = bor(x,rshift(x,1)); 
+	x = bor(x,rshift(x,2)); 
+	x = bor(x,rshift(x,4)); 
+	x = bor(x,rshift(x,8)); 
+	x = bor(x,rshift(x,16)); 
+	x = x + 1;
+	
+	return x
 end
 
 local exports = {
 	is_power_of_two = is_power_of_two;
 	round = round;
+	roundup = roundup32;
 }
 
 return exports;

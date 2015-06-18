@@ -1,7 +1,7 @@
 
 local ffi = require "ffi"
 
-require "cctype"
+local ctype = require "cctype"
 
 
 local function bytestohex(data, datalen)
@@ -24,7 +24,7 @@ end
 local function bytestohexstring(data, datalen)
 	local aline = {}
 	for i=0, datalen-1 do
-		if isprint(data[i]) then
+		if ctype.isprint(data[i]) then
 			table.insert(aline, string.char(data[i]));
 		else
 			--table.insert(aline, string.format("%02x", data[i]));

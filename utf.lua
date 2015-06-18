@@ -128,9 +128,9 @@ local function utf16_to_codepoint(w1, w2)
 end
 
 return {
-	utf8_string_iterator = utf8_string_iterator;
+	utf8_iterator = utf8_string_iterator;
 	
-	utf8_string_length = utf8_string_length;
+	utf8_strlen = utf8_string_length;
 	codepoint_to_utf16 = codepoint_to_utf16;
 	utf16_to_codepoint = utf16_to_codepoint;
 }
