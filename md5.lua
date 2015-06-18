@@ -21,7 +21,7 @@ typedef struct MD5Context {
 local MD5_CTX = ffi.typeof("MD5_CTX");
 
 
-function byteReverse(buf, len)
+local function byteReverse(buf, len)
 end
 
 function F1(x, y, z) return bxor(z, band(x, bxor(y, z))) end

@@ -1,49 +1,44 @@
 local CHAR_BIT  =    8
 local SCHAR_MIN =   -128
 local SCHAR_MAX =    127
-local UCHAR_MAX =    0xff
 
 local SHRT_MIN  =  -32768
 local SHRT_MAX  =   32767
-local USHRT_MAX = 0xffff
 
 local INT_MIN   =  -2147483647 - 1
 local INT_MAX   =   2147483647
-local UINT_MAX  = 0xffffffff
 
 local LONG_MIN  = 0x80000000;
 local LONG_MAX  = 0x7FFFFFFF;
-local ULONG_MAX = 0xFFFFFFFF;
 
 local LLONG_MAX  =   9223372036854775807LL
 local LLONG_MIN  =  -9223372036854775807LL - 1
-local ULLONG_MAX =   0xffffffffffffffffULL
 
 -- Posix definitions
 local PATH_MAX   = 512
 
 return {
-	CHAR_BIT = CHAR_BIT;
+	CHAR_BIT = 8;
 
-	SCHAR_MIN = SCHAR_MIN;
-	SCHAR_MAX = SCHAR_MAX;
-	UCHAR_MAX = UCHAR_MAX;
+	SCHAR_MIN = -128;
+	SCHAR_MAX = 127;
+	UCHAR_MAX = 0xff;
 
 	SHRT_MIN = SHRT_MIN;
 	SHRT_MAX = SHRT_MAX;
-	USHRT_MAX = USHRT_MAX;
+	USHRT_MAX = 0xffff;
 
 	INT_MIN = INT_MIN;
 	INT_MAX = INT_MAX;
-	UINT_MAX = UINT_MAX;
+	UINT_MAX = 0xffffffff;
 
 	LONG_MIN = LONG_MIN;
 	LONG_MAX = LONG_MAX;
-	ULONG_MAX = ULONG_MAX;
+	ULONG_MAX = 0xFFFFFFFF;
 
 	LLONG_MAX = LLONG_MAX;
 	LLONG_MIN = LLONG_MIN;
-	ULLONG_MAX = ULLONG_MAX;
+	ULLONG_MAX = 0xffffffffffffffffULL;
 
 	PATH_MAX = PATH_MAX;
 }

@@ -7,7 +7,6 @@ local lshift = bit.lshift
 
 
 
-
 ffi.cdef[[
 void * malloc ( size_t size );
 void free ( void * ptr );
@@ -121,11 +120,14 @@ return {
 	bcopy = bcopy,
 	bzero = bzero,
 
-	memchr = memchr,
+
+	memset = memset,
 	memcpy = memcpy,
 	memcmp = memcmp,
+
+	memchr = memchr,
 	memmove = memmove,
-	memset = memset,
 
 	memreverse = memreverse,
+	getreverse = getreverse,
 }

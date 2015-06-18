@@ -114,10 +114,3 @@ return {
 	tolower = tolower,
 	toupper = toupper,
 }
-
-
-
-
-
-
-

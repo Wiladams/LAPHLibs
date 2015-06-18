@@ -1,64 +1,65 @@
 package.path = package.path..";../?.lua";
 
-local MemoryStream = require "MemoryStream"
-local Stream = require "Stream"
+local MemoryStream = require "memorystream"
+local Stream = require "stream"
 
 function printStreamState(stream)
-	print(stream:GetLength())
-	print(stream:GetPosition())
+	print(stream:length())
+	print(stream:position())
 end
 
 function test_ReadStream()
-	local rstream = MemoryStream.new(1024)
+	local rstream = MemoryStream(1024)
 	printStreamState(rstream);
 
-	rstream:Seek(0, Stream.SEEK_END)
+	rstream:seek(0, Stream.SEEK_END)
 	printStreamState(rstream);
 end
 
 
 function test_WriteReadStream()
-	local stream = MemoryStream.new(15)
+	print("==== test_WriteReadStream ====")
+	local stream = MemoryStream(15)
 
-	local written = stream:WriteString("William A ")
+	local written = stream:writeString("William A ")
 	print("Written: ", written);
-	written = stream:WriteString("William A ")
+	written = stream:writeString("William A ")
 	print("Written: ", written);
 
-	stream:Seek(0);
+	stream:seek(0);
 
-	local c=stream:ReadByte()
+	local c=stream:readByte()
 	while (c and c ~= 0) do
 		print(string.char(c))
-		c=stream:ReadByte()
+		c=stream:readByte()
 	end
 
-	stream:Seek(1)
-	io.write("'",stream:ReadString(6),"'\n")
+	stream:seek(1)
+	io.write("'",stream:readString(6),"'\n")
 end
 
 
 function test_ReadWrite()
-	local mstream1 = MemoryStream.new()
-	local mstream2 = MemoryStream.new()
+	local mstream1 = MemoryStream(8192)
+	local mstream2 = MemoryStream(8192)
 
--- write something into first memory stream
-local tst_string = "Hello There"
+	-- write something into first memory stream
+	local tst_string = "Hello There"
 
-mstream1:WriteString(tst_string)
-mstream1:CopyTo(mstream2);
+	mstream1:writeString(tst_string)
+	mstream1:copyTo(mstream2);
 
-mstream2:Seek(0)
+	mstream2:seek(0)
 
-local str = mstream2:ReadString(#tst_string)
+	local str = mstream2:readString(#tst_string)
 
-print(str)
+	print(str)
 
-mstream2:WriteString("String One,");
-mstream2:WriteString("String Two,");
-mstream2:WriteString("String Three");
+	mstream2:writeString("String One,");
+	mstream2:writeString("String Two,");
+	mstream2:writeString("String Three");
 
-print(mstream2:ToString())
+	print(mstream2:toString())
 end
 
 function test_ReadOnly()
@@ -71,17 +72,17 @@ Fifth
 And finally the sixth.
 ]]
 
-	local mstream = MemoryStream.Open(str, #str, #str)
+	local mstream = MemoryStream(str, #str)
 
 	repeat
-		local line, err = mstream:ReadLine()
+		local line, err = mstream:readLine()
 		print(string.format("LINE:'%s'", tostring(line)), err);
 	until err == "eof"
 end
 
 
 function test_ReadLine()
-	local mstream = MemoryStream.new(1024)
+	local mstream = MemoryStream:create(1024)
 
 	mstream:WriteString("This is the first line\r\n")
 	mstream:WriteString("And the second")
@@ -94,13 +95,13 @@ function test_ReadLine()
 	mstream:Seek(0)
 
 	repeat
-		local line, err = mstream:ReadLine()
+		local line, err = mstream:readLine()
 		print(string.format("LINE:'%s'", tostring(line)), err);
 	until err == "eof"
 end
 
 function test_Byte_Iterator()
-	local mstream = MemoryStream.new();
+	local mstream = MemoryStream:create();
 
 	mstream:WriteString("This is the first line\r\n")
 	mstream:WriteString("And the second")
@@ -110,12 +111,12 @@ function test_Byte_Iterator()
 	mstream:WriteString("Fifth\n");
 	mstream:WriteString("And finally the sixth.");
 
-	for abyte in mstream:Bytes() do
+	for abyte in mstream:bytes() do
 		io.write(string.char(abyte))
 	end
 
 	-- Iterate the first 4 bytes
-	for abyte in mstream:Bytes(4) do
+	for abyte in mstream:bytes(4) do
 		io.write(string.char(abyte))
 	end
 end
@@ -123,9 +124,10 @@ end
 --test_ReadLine();
 --test_Byte_Iterator();
 test_ReadOnly();
+test_ReadWrite();
 
 
 
 test_ReadStream();
 
---test_WriteReadStream();
+test_WriteReadStream();

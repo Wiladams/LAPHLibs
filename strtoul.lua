@@ -163,14 +163,12 @@ local function strtol(str, endptr, base)
     return _strto_l(str, endptr, base, false);
 end
 
-local function atoi(str)
-	return _strto_l(str, nil, 10, false);
-end
+
 
 local exports = {
 	strtoul = strtoul;
 	strtol = strtol;
-	atoi = atoi;
+
 }
 
 return exports
