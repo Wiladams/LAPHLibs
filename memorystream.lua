@@ -173,7 +173,7 @@ function MemoryStream:readBytes(buff, count, offset)
 	offset = offset or 0
 
 	local pos = self.Position
-	local remaining = self:GetRemaining()
+	local remaining = self:remaining()
 	local src = ffi.cast("const uint8_t *", self.Buffer)+pos
 	local dst = ffi.cast("uint8_t *", buff)+offset
 
