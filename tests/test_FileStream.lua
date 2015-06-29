@@ -1,6 +1,6 @@
 package.path = package.path..";../?.lua";
 
-local FileStream = require "FileStream"
+local FileStream = require "filestream"
 
 local tst_filename = "data/tmp_filestream.bin";
 
@@ -19,7 +19,7 @@ end
 
 
 function test_WriteReadStream()
-	local stream = FileStream.Open(tst_filename)
+	local stream = FileStream(tst_filename)
 
 	if not stream then
 		print("Could not open stream");
