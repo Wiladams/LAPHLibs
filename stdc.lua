@@ -1,8 +1,5 @@
 local exports = {}
 
-if not stdc_included then
-stdc_included = true
-
 
 exports.c99_types = require "c99_types";
 exports.cctype = require("cctype");
