@@ -21,10 +21,10 @@
 
 local ffi = require ("ffi")
 local c99 = require ("c99_types")
-
+local uint8_t = ffi.typeof("uint8_t")
 
 -- Luminance
-local Lum_t = function(ct)
+local function Lum_t (ct)
 	return ffi.typeof("struct { $ Lum;}", ct)
 end
 
@@ -38,7 +38,7 @@ local Lum_mt = {
 }
 
 -- Luminance, with an Alpha channel
-local LumAlpha_t = function(ct)
+local function LumAlpha_t (ct)
 	return ffi.typeof("struct { $ Lum, Alpha;}", ct)
 end
 
@@ -53,7 +53,7 @@ local LumAlpha_mt = {
 
 
 -- RGB
-local RGB_t = function(ct)
+local function RGB_t (ct)
 	return ffi.typeof("struct { $ Red, Green, Blue;}", ct)
 end
 
@@ -68,7 +68,7 @@ local RGB_mt = {
 
 
 -- RGB, with Alpha channel
-local RGBA_t = function(ct)
+local function RGBA_t (ct)
 	return ffi.typeof("struct { $ Red, Green, Blue, Alpha;}", ct)
 end
 
@@ -82,7 +82,7 @@ local RGBA_mt = {
 
 
 -- BGR
-local BGR_t = function(ct)
+local function BGR_t (ct)
 	return ffi.typeof("struct { $ Blue, Green, Red;}", ct)
 end
 
@@ -90,12 +90,12 @@ local BGR_mt = {
 	__len = function(self) return 3 end,
 
 	__tostring = function(self)
-		return string.format("%d, %d, %d, %d", self.Blue, self.Green, self.Red);
+		return string.format("%d, %d, %d", self.Blue, self.Green, self.Red);
 	end,
 }
 
 -- BGR, with Alpha channel
-local BGRA_t = function(ct)
+local function BGRA_t(ct)
 	return ffi.typeof("struct { $ Blue, Green, Red;}", ct)
 end
 
@@ -111,14 +111,14 @@ local BGRA_mt = {
 
 
 -- Concrete type instances based on 'uint8_t' as the component type
-local Lumb = ffi.metatype(Lum_t(c99.uint8_t), Lum_mt);
-local LumAlphab = ffi.metatype(LumAlpha_t(c99.uint8_t), LumAlpha_mt);
+local Lumb = ffi.metatype(Lum_t(uint8_t), Lum_mt);
+local LumAlphab = ffi.metatype(LumAlpha_t(uint8_t), LumAlpha_mt);
 	
-local RGBb = ffi.metatype(RGB_t(c99.uint8_t), RGB_mt);
-local RGBAb = ffi.metatype(RGBA_t(c99.uint8_t), RGBA_mt);
+local RGBb = ffi.metatype(RGB_t(uint8_t), RGB_mt);
+local RGBAb = ffi.metatype(RGBA_t(uint8_t), RGBA_mt);
 
-local BGRb = ffi.metatype(BGR_t(c99.uint8_t), BGR_mt);
-local BGRAb = ffi.metatype(BGRA_t(c99.uint8_t), BGRA_mt);
+local BGRb = ffi.metatype(BGR_t(uint8_t), BGR_mt);
+local BGRAb = ffi.metatype(BGRA_t(uint8_t), BGRA_mt);
 
 
 
