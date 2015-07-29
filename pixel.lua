@@ -21,7 +21,7 @@
 
 local ffi = require ("ffi")
 local c99 = require ("c99_types")
-local uint8_t = ffi.typeof("uint8_t")
+local uint8_t = c99.uint8_t
 
 -- Luminance
 local function Lum_t (ct)
@@ -96,7 +96,7 @@ local BGR_mt = {
 
 -- BGR, with Alpha channel
 local function BGRA_t(ct)
-	return ffi.typeof("struct { $ Blue, Green, Red;}", ct)
+	return ffi.typeof("struct { $ Blue, Green, Red, Alpha;}", ct)
 end
 
 local BGRA_mt = {
