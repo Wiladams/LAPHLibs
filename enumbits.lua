@@ -1,3 +1,16 @@
+--[[
+	Given an integer value that represents a bunch of individual
+	flags of some state, we want to get the string value which 
+	is used as a key to represent the integer flag value in a table.
+
+	The enumbits() runction returns an iterator, which will push
+	out the names of the individual bits, as they are found in a 
+	table.
+
+	for _, name in enumbits(0x04000001, tbleOfValues, b2) do
+		print(name)
+	end
+--]]
 local pow = math.pow
 local bit = require("bit")
 local lshift, rshift, band, bor = bit.lshift, bit.rshift, bit.band, bit.bor
