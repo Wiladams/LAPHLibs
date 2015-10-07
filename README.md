@@ -16,7 +16,7 @@ The original sets of routines came directly out of the earliest projects where I
 
 Latest: 15/06/2015
 	Updated to ensure nothing spills into global namespace by default
-	Updated to use a consistant function signature style
+	Updated to use a consistent function signature style
 
 Current: Works against LUAJIT git HEAD as of 15/06/2015
 
