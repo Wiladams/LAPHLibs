@@ -67,7 +67,7 @@ local function strncmp(str1, str2, num)
 	local ptr2 = ffi.cast("const uint8_t*", str2)
 
 	for i=0,num-1 do
-		if str1[i] == 0 or str2[i] == 0 then return 0 end
+		if ptr1[i] == 0 or ptr2[i] == 0 then return 0 end
 
 		if ptr1[i] > ptr2[i] then return 1 end
 		if ptr1[i] < ptr2[i] then return -1 end
