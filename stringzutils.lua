@@ -107,13 +107,13 @@ local function strcasecmp(str1, str2)
 end
 
 local function strlen(str)
-	local ptr = ffi.cast("uint8_t *", str);
-	local idx = 0
+	local ptr = ffi.cast("char *", str);
+	local idx = 0;
 	while ptr[idx] ~= 0 do
-		idx = idx + 1
+		idx = idx + 1;
 	end
 
-	return idx
+	return idx;
 end
 
 local function strndup(str,n)
