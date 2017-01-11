@@ -46,13 +46,15 @@ local function testMetaConcatStrings()
 end
 
 local function testMetaConcatSBuilder()
-    print("==== testMetaConcatInts() ====")
+    print("==== testMetaConcatSBuilder() ====")
 
     local sb = StringBuilder();
     sb = sb + "the quick " + "brown fox " + "jumps over "
     
     local sb2 = StringBuilder();
-    sb2 = sb2 + "the lazy dogs " + "back"
+    sb2:append("the lazy dogs ")
+    sb2:append("back")
+    
     sb = sb..sb2;
 
     print(tostring(sb))
@@ -75,8 +77,8 @@ print("StringBuilder: ", StringBuilder, "sb1: ", sb1)
     print(sb1:toString("\n"))
 end
 
-testMetaAdd();
-testMetaConcatStrings();
+--testMetaAdd();
+--testMetaConcatStrings();
 testMetaConcatSBuilder();
 --testAppend();
 --testLineEnding();
