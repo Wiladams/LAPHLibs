@@ -11,17 +11,7 @@ local band = bit.band
 local bor = bit.bor
 
 
-local function tolower(c)
-	return band(0xff,bor(c, 0x20))
-end
 
-local function toupper(c)
-	if (islower(c)) then
-		return band(c, 0x5f)
-	end
-
-	return c
-end
 
 local t_a = string.byte('a')
 local t_f = string.byte('f')
@@ -32,14 +22,22 @@ local t_Z = string.byte('Z')
 local t_0 = string.byte('0')
 local t_9 = string.byte('9')
 
-local function isalnum(c)
-	return (isalpha(c) or isdigit(c))
-end
+
 
 local function isalpha(c)
 	return (c >= t_a and c <= t_z) or
 		(c >= t_A and c <= t_Z)
 end
+
+local function isdigit(c)
+	return c >= t_0 and c <= t_9
+end
+
+local function isalnum(c)
+	return (isalpha(c) or isdigit(c))
+end
+
+
 
 local function isascii(c)
 	return (c >= 0) and (c <= 0x7f)
@@ -53,9 +51,7 @@ local function iscntrl(c)
 	return (c >= 0 and c < 0x20) or (c == 0x7f)
 end
 
-local function isdigit(c)
-	return c >= t_0 and c <= t_9
-end
+
 
 local function isgraph(c)
 	return c > 0x20 and c < 0x7f
@@ -96,6 +92,18 @@ local function isxdigit(c)
 		(c >= t_A and c <= t_F)
 end
 
+local function tolower(c)
+	return band(0xff,bor(c, 0x20))
+end
+
+local function toupper(c)
+	if (islower(c)) then
+		return band(c, 0x5f)
+	end
+
+	return c
+end
+
 return {
 	isalnum = isalnum,
 	isalpha = isalpha,
@@ -105,10 +113,10 @@ return {
 	isdigit = isdigit,
 	isgraph = isgraph,
 	islower = islower,
+	isupper = isupper,
 	isprint = isprint,
 	ispunct = ispunct,
 	isspace = isspace,
-	isupper = isupper,
 	isxdigit = isxdigit,
 
 	tolower = tolower,

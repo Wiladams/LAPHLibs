@@ -16,6 +16,8 @@ local function round(n)
 	return ceil(n-0.5)
 end
 
+-- determine whether the specified
+-- value is a power of two
 local function is_power_of_two(value)
 	if value == 0 then
 		return false;
@@ -38,6 +40,8 @@ local function roundup32(x)
 	return x
 end
 
+-- minimum number of bytes needed ro 
+-- represent a specific value
 local function min_bytes_needed(value)
     local bytes;
     

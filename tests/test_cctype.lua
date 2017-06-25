@@ -4,8 +4,13 @@ local ctype = require "cctype"
 
 ffi = require "ffi"
 
-function test_isspace ()
+function test_toupper()
+	print("==== test_toupper ====")
+	print('a', string.char(ctype.toupper(string.byte('a'))))
+end
 
+function test_isspace ()
+	print("==== test_isspace ====")
   local c;
   local i=0;
   local str = ffi.cast("char *", "Example \vsentence\t to test isspace\n");
@@ -24,6 +29,7 @@ function test_isspace ()
 end
 
 function test_isalpha()
+	print("==== test_isalpha ====")
 	assert(ctype.isalpha(string.byte('a')))
 	assert(ctype.isalpha(string.byte('z')))
 	assert(ctype.isalpha(string.byte('A')))
@@ -36,5 +42,6 @@ end
 
 test_isalpha();
 test_isspace();
+test_toupper();
 
 print("PASS")
