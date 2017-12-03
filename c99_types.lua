@@ -62,36 +62,47 @@ local c99_types = {
 
 	int8_t = int8_t,
 	int8_tv = int8_tv,
+	int8_tp = int8_tp,
 
 	uint8_t = uint8_t,
 	uint8_tv = uint8_tv,
+	uint8_tp = uint8_tp,
 
 	int16_t = int16_t,
 	int16_tv = int16_tv,
-	
+	int16_tp = int16_tp,
+
 	uint16_t = uint16_t,
 	uint16_tv = uint16_tv,
+	uint16_tp = uint16_tp,
 
 	int32_t = int32_t,
 	int32_tv = int32_tv,
-	
+	int32_tp = int32_tp,
+
 	uint32_t = uint32_t,
 	uint32_tv = uint32_tv,
+	uint32_tp = uint32_tp,
 
 	int64_t = int64_t,
 	int64_tv = int64_tv,
-	
+	int64_tp = int64_tp,
+
 	uint64_t = uint64_t,
 	uint64_tv = uint64_tv,
+	uint64_tp = uint64_tp,
 
 	float = float,
 	floatv = floatv,
-	
+	floatp = floatp,
+
 	double = double,
 	doublev= doublev,
+	doublep = doublep,
 
 	wchar_t = wchar_t,
 	wchart_tv = wchar_tv,
+	wchar_tp = wchar_tp,
 }
 
 return c99_types;

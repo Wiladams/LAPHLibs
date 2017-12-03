@@ -113,10 +113,10 @@ return {
 	isdigit = isdigit,
 	isgraph = isgraph,
 	islower = islower,
-	isupper = isupper,
 	isprint = isprint,
 	ispunct = ispunct,
 	isspace = isspace,
+	isupper = isupper,
 	isxdigit = isxdigit,
 
 	tolower = tolower,
