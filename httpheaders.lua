@@ -1,3 +1,13 @@
+--[[
+	Description: 
+	This file is essentially an embeddable database.  The 'key' is the name
+	of a particular HTTP header.  The value is a table that tells you whether
+	the given header is part of requests, responses, or both.
+
+	Depending on the application, the database can be used directly, or it
+	can be used to generate other structures and tables which are
+	more appropriate.
+--]]
 local httpheaders = {
 	["Accept"] = {request=true};
 	["Accept-Charset"] = {request=true};
