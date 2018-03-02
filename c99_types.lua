@@ -12,39 +12,49 @@ end
 
 local int8_t = ffi.typeof("int8_t");
 local int8_tv = array_tv(int8_t);
+local int8_tp = pointer_t(int8_t);
 
 local uint8_t = ffi.typeof("uint8_t");
 local uint8_tv = array_tv(uint8_t);
+local uint8_tp = pointer_t(uint8_t);
 
 local int16_t = ffi.typeof("int16_t");
 local int16_tv = array_tv(int16_t);
+local int16_tp = pointer_t(int16_t);
 
 local uint16_t = ffi.typeof("uint16_t");
 local uint16_tv = array_tv(uint16_t);
+local uint16_tp = pointer_t(uint16_t);
 
 local int32_t = ffi.typeof("int32_t");
 local int32_tv = array_tv(int32_t);
+local int32_tp = pointer_t(int32_t);
 
 local uint32_t = ffi.typeof("uint32_t");
 local uint32_tv = array_tv(uint32_t);
+local uint32_tp = pointer(uint32_t);
 
 local int64_t = ffi.typeof("int64_t");
 local int64_tv = array_tv(int64_t);
+local int64_tp = pointer_t(int54_t);
 
 local uint64_t = ffi.typeof("uint64_t");
 local uint64_tv = array_tv(uint64_t);
+local uint64_tp = pointer_t(uint64_t);
 
 local float = ffi.typeof("float");
 local floatv = array_tv(float);
+local floatp = pointer_t(float);
 
 local double = ffi.typeof("double");
 local doublev = array_tv(double);
-
+local doublep = pointer_t(double);
 
 
 
 local wchar_t = ffi.typeof("uint16_t");
 local wchar_tv = array_tv(wchar_t);
+local wchar_tp = pointer(wchar_t);
 
 local c99_types = {
 	array_tv = array_tv,

@@ -3,7 +3,7 @@
 	flags of some state, we want to get the string value which 
 	is used as a key to represent the integer flag value in a table.
 
-	The enumbits() runction returns an iterator, which will push
+	The enumbits() function returns an iterator, which will push
 	out the names of the individual bits, as they are found in a 
 	table.
 

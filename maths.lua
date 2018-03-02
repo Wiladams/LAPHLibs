@@ -16,6 +16,8 @@ local function round(n)
 	return ceil(n-0.5)
 end
 
+-- determine whether the specified
+-- value is a power of two
 local function is_power_of_two(value)
 	if value == 0 then
 		return false;
@@ -40,9 +42,10 @@ end
 
 --[[
     Find the minimum number of bytes required to represent
-    a given positive integer.  Nubers range from one byte 
+    a given positive integer.  Numbers range from one byte 
     up to 8 bytes.
 ]]
+
 local function min_bytes_needed(value)
     local bytes;
     
