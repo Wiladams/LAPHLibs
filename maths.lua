@@ -38,6 +38,11 @@ local function roundup32(x)
 	return x
 end
 
+--[[
+    Find the minimum number of bytes required to represent
+    a given positive integer.  Nubers range from one byte 
+    up to 8 bytes.
+]]
 local function min_bytes_needed(value)
     local bytes;
     
