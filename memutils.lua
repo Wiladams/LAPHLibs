@@ -1,3 +1,15 @@
+--[[
+	memmutils
+
+	A set of functions that are typically found in old C libraries.
+	The typical 'C' versions aren't typically utilized because of issues
+	of safety, typically running off the end of an array and such.
+
+	these versions do not offer much safety either.  They exist purely to make
+	it easier to port code that is coming from 'C', and they are almost
+	a drop in replacement for the classics.
+--]]
+
 local ffi = require "ffi"
 local bit = require "bit"
 local band = bit.band
