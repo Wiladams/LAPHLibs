@@ -6,8 +6,8 @@
 	types based on using 'uint8_t' as the base type.
 
 	In most cases, you can just use the common uint8_t based
-	types, but if you want to create your own, using uint16_t
-	for example, the various parameterized types will help you.
+	types, but if you want to create your own, using uint16_t,
+	or float for example, the various parameterized types will help you.
 
 	The types do have metatypes, which are intended to be fairly
 	minimalist.
@@ -16,7 +16,9 @@
 	and have a simple 'tostring()' function for easy debugging.
 
 	Some other additions might be for convenient constructors, 
-	which can be implemented using the '__new()' metamethod.
+	which can be implemented using the '__new()' metamethod, but
+	since you can already do a simple constructor, it's probably
+	not needed.
 --]]
 
 local ffi = require ("ffi")
@@ -46,7 +48,7 @@ local LumAlpha_mt = {
 	__len = function(self) return 2 end,
 	
 	__tostring = function(self)
-		return string.format("%d, %d, %d", self.Lum, self.Alpha);
+		return string.format("%d, %d", self.Lum, self.Alpha);
 	end,
 
 }
