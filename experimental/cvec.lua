@@ -42,7 +42,7 @@ local kvec_mt = {
 		capacity = capacity or 1
 		local obj = ffi.new(ct, 0, capacity, capacity)
 
-		print("__new typeof Data: ", ffi.typeof(obj.Data[0]));
+		--print("__new typeof Data: ", ffi.typeof(obj.Data[0]));
 
 		return obj;
 	end,
@@ -68,7 +68,7 @@ local kvec_mt = {
 				return nil
 			end
 
-			print("Realloc: ", ffi.typeof(self.Data));
+			--print("Realloc: ", ffi.typeof(self.Data));
 
 			local newdata = ffi.new(self.Data[0], nelems);
 

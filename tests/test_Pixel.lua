@@ -2,9 +2,9 @@ package.path = package.path..";../?.lua"
 
 local ffi = require ("ffi")
 local c99 = require ("c99_types")
-local PX = require("Pixel")
+local PX = require("pixel")
 
-local testRGB = function()
+local function testRGB()
 local RGB = PX.RGB
 local RGB_v = PX.RGB_v
 

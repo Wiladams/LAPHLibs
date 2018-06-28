@@ -108,7 +108,7 @@ function enum.getCdef(self, enumname, prefix, inorder)
         -- Want to do them in numerical order
         -- best way is to put in sorted table
         local len = dictLength(self);
-        print("LENGTH: ", len)
+        --print("LENGTH: ", len)
     end
     sb:append(string.format("} %s;", enumname))
 

@@ -1,5 +1,22 @@
 --[[
     A simple class to help build up strings
+
+    Usage:
+    local sb = StringBuilder();
+    sb:append("this ")
+    sb:append("is a ")
+    sb:append("long ")
+    sb:append("string.")
+
+    print(sb:toString())
+
+    You can also do it this way:
+
+    local sb = StringBuilder();
+    sb.."this ".."is a ".."long ".."string."
+
+    But, that's more wasteful as mostly it's doing regular string concatenation
+    until the final 'this', which is appended to the string builder.
 --]]
 
 local table = table;
@@ -21,7 +38,7 @@ local StringBuilder_mt = {
     end,
 
     __concat = function(self, ...)
-    print("__concat: ", select(1, ...))
+    --print("__concat: ", select(1, ...))
         self:append(...)
         return self
     end,
