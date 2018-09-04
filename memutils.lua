@@ -18,13 +18,29 @@ local rshift = bit.rshift
 local lshift = bit.lshift
 
 
-
+--[[
+	You should be able to get at these (malloc, free, realloc)
+	simply by using: ffi.C.malloc, etc 
+	from anywhere, as they should already be compiled in, 
+	and accessible, to your lua runtime
+]]
 ffi.cdef[[
 void * malloc ( size_t size );
 void free ( void * ptr );
 void * realloc ( void * ptr, size_t size );
 ]]
 
+
+--[[
+	These various routines provide no safety, just like
+	their 'C' counterparts from which they are derived.
+
+	There is a temptation to provide some amount of safety
+	by checking null values, and ranges and whatnot, but 
+	if you do that, you'll silently swallow problems.
+	Better to let the call fail, then you can figure out
+	the source of the failure more easily.
+]]
 local function bzero(dest, nbytes)
 	ffi.fill(dest, nbytes)
 	return dest
@@ -41,8 +57,6 @@ local function bcmp(ptr1, ptr2, nbytes)
 
 	return 0
 end
-
-
 
 local function memset(dest, c, len)
 	ffi.fill(dest, len, c)
@@ -73,6 +87,13 @@ local function memchr(ptr, value, num)
 	return nil
 end
 
+--[[
+	memmove
+
+	Do a copy of memory from one location to another.
+	The specific benefit of memmove is it can handle
+	overlapping source and destination.
+]]
 local function memmove(dst, src, num)
 	local srcptr = ffi.cast("const uint8_t*", src)
 
@@ -108,6 +129,14 @@ local function memreverse(buff, bufflen)
 	return buff
 end
 
+--[[
+	getreverse
+
+	return a copy of the 'src' data, in reverse order
+
+	src - something that can be cast as const uint8_t *
+	len - the length of 'src'
+]]
 local function getreverse(src, len)
 	if not len then
 		if type(src) == "string" then

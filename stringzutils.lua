@@ -6,6 +6,16 @@ local rshift = bit.rshift
 local lshift = bit.lshift
 
 --[[
+	A bunch of 'string' utilizes from the standard 'C' domain.
+	These various utilities assume 'null terminated' strings.  In general
+	they have the same mis-behavior as their C counterparts, which means
+	they can be very dangerous.
+
+	The value of these routines is to have something that directly reflects 
+	what you can do in 'C', which makes porting 'C' code easier initially.  As soon
+	as you can, you'll want to replace with safer standard Lua constructs.
+]]
+--[[
 	String Functions
 
 	strlen

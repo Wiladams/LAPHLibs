@@ -180,6 +180,7 @@ end
 --CreateASCIITokens();
 
 local exports = {
+	ASCIILookupTable = ASCIILookupTable;
 	GetASCIITokens = GetASCIITokens;
 	CreateASCIITokens = CreateASCIITokens;
 }

@@ -8,8 +8,8 @@ local bor = bit.bor
 local rshift = bit.rshift
 local lshift = bit.lshift
 
-local mutils = require "memutils"
-local stringz = require "stringzutils"
+--local mutils = require "memutils"
+--local stringz = require "stringzutils"
 
 ffi.cdef[[
 typedef struct MD5Context {
