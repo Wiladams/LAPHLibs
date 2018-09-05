@@ -226,7 +226,7 @@ function mt:close ()
 	return finalresult256(self.H)
 end
 
-sha2 = {
+local sha2 = {
 	sha224 = sha224,
 	sha256 = sha256,
 
