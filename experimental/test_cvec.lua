@@ -6,6 +6,7 @@ local CVec = require "cvec"
 local Vector = require "Vector"
 
 function test_intvec()
+	print("==== test_intvec ====")
 	ivec = CVec.NewKind(ffi.typeof("int"));
 
 	local ivec1 = ivec();
@@ -87,7 +88,7 @@ function test_call()
 end
 
 function test_factory()
-
+print("==== test_factory ====")
 	local ivec = CVec.NewKind("int");
 	local indices = ivec();
 	
@@ -97,6 +98,6 @@ end
 --test_call();
 --test_intvec();
 
---test_pointvec();
+test_pointvec();
 --test_vec();
 

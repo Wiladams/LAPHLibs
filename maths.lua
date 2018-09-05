@@ -16,6 +16,7 @@ local function round(n)
 	return ceil(n-0.5)
 end
 
+
 -- determine whether the specified
 -- value is a power of two
 local function is_power_of_two(value)
