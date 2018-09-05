@@ -16,40 +16,32 @@ local rshift = bit.rshift
 
 local base64={}
 
-local base64bytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-
+local base64alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+local base64bytes = ffi.cast("const char *", base64alphabet)
 
 -- ' ' 0x20, '\t' 0x09, '\n' 0x0a, '\v' 0x0b, '\f' 0x0c, '\r' 0x0d
 local function isspace(c)
 	return c == 0x20 or c == 0x08 or c == 0x09 or (c >= 0x0a and c <= 0x0d)  
 end
 
-function base64.char64index(c)
-	local pstart = ffi.cast("const char *", base64bytes);
-	local p = pstart
-	local offset = 0;
+local function char64index(c)
+    for idx=0, #base64alphabet-1 do
+        if base64bytes[idx] == c then
+            return idx;
+        end
+    end
 
-	while p[offset] ~= c do
-		if p[offset] == 0 then
-			--print("RETURNING NULL");
-			return nil
-		end
-		offset = offset + 1
-	end
-
-	return offset
+    return nil;
 end
 
-
-
-function base64.bencode(b, c1, c2, c3, n)
+local function bencode(b, c1, c2, c3, n)
 	local tuple = (c3+256*(c2+256*c1));
 	local i;
 	local s = {}
 
 	for i=0, 3 do
-		local offset = (tuple % 64)+1
-		local c = base64bytes:sub(offset, offset)
+		local offset = (tuple % 64)
+        local c = base64bytes[offset];
 
 		s[4-i] = c;
 		tuple = rshift(tuple, 6)	-- tuple/64;
@@ -65,7 +57,7 @@ function base64.bencode(b, c1, c2, c3, n)
 end
 
 
-function base64.encode(s, l)
+local function encode(s, l)
 	l = l or #s
 	local ptr = ffi.cast("const uint8_t *", s);
 
@@ -75,7 +67,7 @@ function base64.encode(s, l)
 		local c1 = ptr[(i-1)*3+0]
 		local c2 = ptr[(i-1)*3+1]
 		local c3 = ptr[(i-1)*3+2]
-		base64.bencode(b,c1,c2,c3,3);
+		bencode(b,c1,c2,c3,3);
 	end
 
 	-- Finish off the last few bytes
@@ -83,18 +75,18 @@ function base64.encode(s, l)
 
 	if leftovers == 1 then
 		local c1 = ptr[(n*3)+0]
-		base64.bencode(b,c1,0,0,1);
+		bencode(b,c1,0,0,1);
 	elseif leftovers == 2 then
 		local c1 = ptr[(n*3)+0]
 		local c2 = ptr[(n*3)+1]
-		base64.bencode(b,c1,c2,0,2);
+		bencode(b,c1,c2,0,2);
 	end
 
 	return table.concat(b)
 end
 
 
-function base64.bdecode(b, c1, c2, c3, c4, n)
+function bdecode(b, c1, c2, c3, c4, n)
 	local tuple = c4+64*(c3+64*(c2+64*c1));
 	local s={};
 
@@ -111,7 +103,7 @@ end
 
 local T_eq = string.byte('=')
 
-function base64.decode(s)
+local function decode(s)
 
 	local l = #s;
 	local b = {};
@@ -128,13 +120,13 @@ function base64.decode(s)
 			return table.concat(b);
 		elseif c == T_eq then
 			if n ==  1 then
-				base64.bdecode(b,t[0],0,0,0,1);
+				bdecode(b,t[0],0,0,0,1);
 			end
 			if n == 2 then
-				base64.bdecode(b,t[0],t[1],0,0,2);
+				bdecode(b,t[0],t[1],0,0,2);
 			end
 			if n == 3 then
-				base64.bdecode(b,t[0],t[1],t[2],0,3);
+				bdecode(b,t[0],t[1],t[2],0,3);
 			end
 
 			-- If we've swallowed the '=', then
@@ -143,7 +135,7 @@ function base64.decode(s)
 		elseif isspace(c) then
 			-- If whitespace, then do nothing
 		else
-			local p = base64.char64index(c);
+			local p = char64index(c);
 			if (p==nil) then
 				return nil;
 			end
@@ -151,7 +143,7 @@ function base64.decode(s)
 			t[n]= p;
 			n = n+1
 			if (n==4) then
-				base64.bdecode(b,t[0],t[1],t[2],t[3],4);
+				bdecode(b,t[0],t[1],t[2],t[3],4);
 				n=0;
 			end
 		end
@@ -164,4 +156,8 @@ function base64.decode(s)
 	return table.concat(b);
 end
 
-return base64
+
+return {
+    encode = encode;
+    decode = decode;
+}
