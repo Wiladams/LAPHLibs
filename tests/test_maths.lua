@@ -1,5 +1,6 @@
 package.path = package.path..";../?.lua"
 
+local ffi = require("ffi")
 local bit = require("bit")
 local lshift = bit.lshift;
 local pow = math.pow;
@@ -11,7 +12,7 @@ local round = maths.round;
 
 local function test_poweroftwo()
 	for i=0,31 do
-		value = lshift(1, i);
+		local value = lshift(1ULL, i);
 
 		print(i, value, pow(2, i), isPowerOfTwo(value))
 	end

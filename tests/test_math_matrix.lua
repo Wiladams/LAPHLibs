@@ -39,7 +39,8 @@ local function test_vec()
 	print("angleBetween: ", math.deg(xaxis:angleBetween(yaxis)));
 end
 
-local test_normal = function()
+local function test_normal()
+	print("== test_normal ==")
 --	local p1 = vec3(-37.262199401855, -17.623699188232, 0);
 --	local p2 = vec3(-40.927501678467, -24.531000137329, 0);
 --	local p3 = vec3(-35.355350494385, -14.64465045929, 0);
@@ -48,8 +49,8 @@ local test_normal = function()
 	local p2 = vec3(0,0,0);
 	local p3 = vec3(5,0,0);
 
+	print("plane normal")
 	local n = math_matrix.PlaneNormal(p1, p2, p3);
-
 	print(n);
 
 	print("axis normal")
@@ -186,7 +187,8 @@ local test_determinant = function()
 --]]
 end
 
-local test_inverse = function()
+local function test_inverse()
+    print("== test_inverse ==")
 	local A = mat3({
 		{3,0,2},
 		{2,0,-2},
@@ -217,6 +219,7 @@ local test_inverse = function()
 end
 
 local test_transpose = function()
+    print("== test_transpose ==")
 	local D = mat4({
 		{3,2,0,1},
 		{4,0,1,2},
@@ -385,14 +388,14 @@ local function test_swizzling()
 	print("t1 == t2: ", t1 == t2);
 end
 
-test_vec();
---test_normal();
+--test_vec();
+test_normal();
 --test_cofactor();
 --test_determinant();
 --test_inverse();
 --test_transpose();
 
-test_mat2();
+--test_mat2();
 --test_matrix();
 --test_matrix1();
 --test_matrix2();
