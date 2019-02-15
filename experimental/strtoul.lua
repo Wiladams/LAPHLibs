@@ -1,4 +1,11 @@
 --[[
+	Playing around with a 'string to long' function.  There is
+	really no need to use this code as Lua itself has a perfectly
+	fine implementation of the same, which does a whole lot
+	more.
+
+	But, here it is if anyone wants to examine such a thing
+	
 	This code was inspired by the code here:
 
 	http://lists.uclibc.org/pipermail/uclibc/2000-December/020921.html
@@ -19,8 +26,8 @@
 
 local ffi = require "ffi"
 
-require "limits"
-require "cctype"
+limits = require "limits"
+cctype = require "cctype"
 
 
 --[[
@@ -91,8 +98,8 @@ local function _strto_l(str, endptr, base, uflag)
 		--goto DONE;
     end
 
-    cutoff = ULONG_MAX / base;
-    cutoff_digit = ULONG_MAX - cutoff * base;
+    cutoff = limits.ULONG_MAX / base;
+    cutoff_digit = limits.ULONG_MAX - cutoff * base;
 
     while (true) do
 
@@ -136,7 +143,7 @@ local function _strto_l(str, endptr, base, uflag)
 
     if (negative) then
 		if (not uflag and (number > (ffi.cast("uint32_t",(-(1+LONG_MIN)))+1))) then
-			return LONG_MIN;
+			return limits.LONG_MIN;
 		end
 
 		return -number;
