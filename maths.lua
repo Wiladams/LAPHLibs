@@ -7,8 +7,10 @@ local limits = require("limits")
 local floor = math.floor;
 local ceil = math.ceil;
 
+local exports = {}
+
 -- because it's not in the standard math library
-local function round(n)
+function exports.round(n)
 	if n >= 0 then
 		return floor(n+0.5)
 	end
@@ -19,7 +21,7 @@ end
 
 -- determine whether the specified
 -- value is a power of two
-local function is_power_of_two(value)
+function exports.is_power_of_two(value)
 	if value == 0 then
 		return false;
 	end
@@ -29,7 +31,7 @@ end
 
 -- round up to the nearest
 -- power of 2
-local function roundup32(x) 
+function exports.roundup32(x) 
 	x = x - 1; 
 	x = bor(x,rshift(x,1)); 
 	x = bor(x,rshift(x,2)); 
@@ -47,7 +49,7 @@ end
     up to 8 bytes.
 ]]
 
-local function min_bytes_needed(value)
+function exports.min_bytes_needed(value)
     local bytes;
     
     if (value <= limits.UINT32_MAX) then
@@ -84,11 +86,12 @@ local function min_bytes_needed(value)
     return bytes;
 end
 
-local exports = {
-	is_power_of_two = is_power_of_two;
-	min_bytes_needed = min_bytes_needed;
-	round = round;
-	roundup = roundup32;
-}
+function exports.clamp(x, low, high)
+    return math.min(math.max(x, low), high)
+end
+
+function exports.lerp(x, olow, ohigh, rlow, rhigh)
+    return rlow + (x-olow)*((rhigh-rlow)/(ohigh-olow))
+end
 
 return exports;
