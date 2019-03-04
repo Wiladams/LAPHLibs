@@ -4,7 +4,7 @@ LAPHLibs
 Lua Application Programming Helper Libraries
 
 This is a repository of things I have found to be useful
-while programming in LuaJIT.  
+while programming using LuaJIT.  As it seems to get some usage, I touch the files every once in a while when I find bugs, or better ways of doing things.
 
 As the purpose of most of these routines are to offer some amount of function typically found in standard C libraries, there is at least usage of bit operations, memmory manipulation, and the like.  For most of these cases, the LuaJIT ffi and "bit" modules are used.  So, this code is not necessarily meant for usage with vanilla Lua.
 
@@ -13,6 +13,9 @@ In cases where 'C' functions are being supported, it's important to note the mem
 
 
 The original sets of routines came directly out of the earliest projects where I was learning to use the LuaJIT ffi mechanism.  As such, they were kind of rough, and a hodge podge of styles and usefulness.  Over time, various of the routines have been surpassed by better implementations in various projects, or by functions being implemented in the LuaJIT compiler itself.
+
+Latest: 13/02/2019
+	Added math_matrix, test_math_matrix
 
 Latest: 15/06/2015
 	Updated to ensure nothing spills into global namespace by default
@@ -64,6 +67,10 @@ LUXL.lua
 Implementation of very low level XML lexer/parser.  This is not a conformant validating XML parser, but it's enough to get the job done on typical .xml configuration files, and many data streams.
 
 This implementation does no memory allocations.  It returns pointers and sizes as a result of the lexing activities.
+
+math_matrix
+===========
+Implementation of matrix operations.  With this single file, you can create reasonably sized matrices (and single dimension vectors) and give them a specific base type (int, double, float, etc).  Very convenient routines such as dot, cross, determinant, inverse, multiply, etc.  Some convenient types such as mat3, mat4 already defined.
 
 MD5.lua
 =======

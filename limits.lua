@@ -2,29 +2,40 @@
 -- Posix definitions
 
 local exports = {
-	CHAR_BIT = 8;
 
-	SCHAR_MIN = -128;
-	SCHAR_MAX = 127;
-	UCHAR_MAX = 0xff;
+	INT_MIN = -128;
+	INT8_MAX = 127;
+	UINT8_MAX = 0xff;
 
-	SHRT_MIN = -32768;
-	SHRT_MAX = 32767;
-	USHRT_MAX = 0xffff;
+	INT16_MIN = -32768;
+	INT16_MAX = 32767;
+	UINT16_MAX = 0xffff;
 
-	INT_MIN = -2147483647 - 1;
-	INT_MAX = 2147483647;
-	UINT_MAX = 0xffffffff;
+	INT32_MIN = -2147483647 - 1;
+	INT32_MAX = 2147483647;
+	UINT32_MAX = 0xffffffff;
 
-	LONG_MIN = 0x80000000;
-	LONG_MAX = 0x7FFFFFFF;
-	ULONG_MAX = 0xFFFFFFFF;
 
-	LLONG_MAX = 9223372036854775807LL;
-	LLONG_MIN = -9223372036854775807LL - 1;
-	ULLONG_MAX = 0xffffffffffffffffULL;
+	UINT64_MAX = 9223372036854775807LL;
+	UINT64_MIN = -9223372036854775807LL - 1;
+	UINT64_MAX = 0xffffffffffffffffULL;
 
-	PATH_MAX = 512;
 }
+
+-- Windows specific
+exports.CHAR_BIT = 8;	-- number of bits in a char
+exports.PATH_MAX = 512;
+
+-- LONG and INT tend to match the natural
+-- lengths of the platform so the following
+-- is not necessarily correct
+exports.LONG_MIN = 0x80000000;
+exports.LONG_MAX = 0x7FFFFFFF;
+exports.ULONG_MAX = 0xFFFFFFFF;
+
+exports.ULLONG_MAX = exports.UINT64_MAX
+exports.UINT_MAX = exports.UINT32_MAX;
+exports.USHRT_MAX = exports.UINT16_MAX;
+exports.UCHAR_MAX = exports.UINT8_MAX;
 
 return exports
