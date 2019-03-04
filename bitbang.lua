@@ -7,19 +7,68 @@ local bxor = bit.bxor
 local bnot = bit.bnot
 local rshift = bit.rshift
 
+local uint64 = ffi.typeof("uint64_t")
+
+-- return a value with the single bit
+-- set.
+local function BIT(bitnum)
+	return 2^bitnum
+end
+
+-- This will work for any number of bits from 32 to 63
+local function BITMASK(lowbit, highbit)
+	local mask = 0ULL
+	for i=lowbit, highbit do
+		mask = bor(mask, 2ULL^i)
+	end
+
+	return mask 
+end
+
+local function BITMASK32(lowbit, highbit)
+	-- create a mask which matches the desired range
+	-- of bits
+	local bitcount = highbit-lowbit+1
+
+	local mask = 0xffffffff
+	mask = lshift(mask, bitcount)
+	mask = bnot(mask)
+	mask = lshift(mask, lowbit)
+
+	return mask
+end
+
+local function BITSVALUE(src, lowbit, highbit)
+	lowbit = lowbit or 0
+	highbit = highbit or 0
+
+	return rshift(band(src, BITMASK(lowbit, highbit), lowbit))
+end
+
+local function getbitsvalue(src, lowbit, bitcount)
+	return BITSVALUE(src, lowbit, lowbit+bitcount-1)
+end
 
 
+
+
+-- Individual bit manipulations
+-- Check to see if a particular bit is set
 local function isset(value, bit)
 	return band(value, 2^bit) > 0
 end
 
+-- set a particular bit in a value
 local function setbit(value, bit)
 	return bor(value, 2^bit)
 end
 
+-- clear a single bit in a value
 local function clearbit(value, bit)
 	return band(value, bnot(2^bit))
 end
+
+
 
 local function numbertobinary(value, nbits, bigendian)
 	nbits = nbits or 32
@@ -89,17 +138,7 @@ local function bytestobinary(bytes, length, offset, bigendian)
 	return table.concat(res)
 end
 
-local function getbitsvalue(src, lowbit, bitcount)
-	lowbit = lowbit or 0
-	bitcount = bitcount or 32
 
-	local value = 0
-	for i=0,bitcount-1 do
-		value = bor(value, band(src, 2^(lowbit+i)))
-	end
-
-	return rshift(value,lowbit)
-end
 
 local function getbitstring(value, lowbit, bitcount)
 	return numbertobinary(getbitsvalue(value, lowbit, bitcount))
@@ -160,19 +199,7 @@ local function setbitstobytes(bytes, startbit, bitcount, value, bigendian)
 	return bytes
 end
 
-local function extractbits32(src, lowbit, bitcount)
-	-- create a mask which matches the desired range
-	-- of bits
-	local mask = 0xffffffff
-	mask = lshift(mask, bitcount)
-	mask = bnot(mask)
-	mask = lshift(mask, lowbit)
 
-	-- use the mask, and a shift to get the desired
-	-- value
-	local value = rshift(band(mask, src), lowbit)
-	return value;
-end
 
 local function extractbits64(src, lowbit, bitcount)
 	-- create a mask which matches the desired range
@@ -243,9 +270,15 @@ local function setbits64(dst, lowbit, bitcount, value)
 end
 
 local exports = {
+	BIT = BIT;
+	BITMASK = BITMASK;
+	BITMASK32 = BITMASK32;
+	BITSVALUE = BITSVALUE;
+
 	isset = isset;
 	setbit = setbit;
 	clearbit = clearbit;
+
 	numbertobinary = numbertobinary;
 	binarytonumber = binarytonumber;
 	bytestobinary = bytestobinary;
@@ -255,7 +288,7 @@ local exports = {
 	getbitsfrombytes = getbitsfrombytes;
 	setbitstobytes = setbitstobytes;
 
-	extractbits32 = extractbits32;
+	extractbits32 = getbitsvalue;
 	extractbits64 = extractbits64;
 
 	setbits32 = setbits32;
