@@ -1,3 +1,8 @@
+22 Jun 2019
+===========
+## A few additions
+* Adding easing.lua routines for value interpolation
+
 17 Jun 2015
 ===========
 ###Cosmetic changes
