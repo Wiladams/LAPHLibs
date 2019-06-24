@@ -6,8 +6,37 @@ local limits = require("limits")
 
 local floor = math.floor;
 local ceil = math.ceil;
+local max = math.max;
+local min = math.min;
 
-local exports = {}
+
+local exports = {
+    HALF_PI = math.pi / 2;
+    PI = math.pi;
+    QUARTER_PI = math.pi/4;
+    TWO_PI = math.pi * 2;
+    TAU = math.pi * 2;
+}
+
+function exports.constrain(x, low, high)
+    return min(max(x, low), high)
+end
+
+function exports.lerp(low, high, x)
+    return low + x*(high-low)
+end
+
+function exports.map(x, olow, ohigh, rlow, rhigh, withinBounds)
+    rlow = rlow or olow
+    rhigh = rhigh or ohigh
+    local value = rlow + (x-olow)*((rhigh-rlow)/(ohigh-olow))
+
+    if withinBounds then
+        value = exports.constrain(value, rlow, rhigh)
+    end
+
+    return value;
+end
 
 -- because it's not in the standard math library
 function exports.round(n)

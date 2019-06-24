@@ -14,11 +14,15 @@
     of 'doneness'
 
     References: 
+    https://easings.net/en
     http://gizma.com/easing/
+    older broken link
+    http://www.robertpenner.com
+
 ]]
 
 -- local access to some math stuff
-local PI = math.PI;
+local PI = math.pi;
 local pow = math.pow;
 local sqrt = math.sqrt;
 local sin = math.sin;
