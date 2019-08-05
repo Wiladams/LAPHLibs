@@ -22,8 +22,11 @@ local band = bit.band
 
 
 --[[
- Types of characters; 0 is not valid, 1 is letters, 2 are digits
-   (including '.') and 3 whitespace.
+ Types of characters; 
+	 0 is not valid 
+	 1 is letters, 
+	 2 are digits (including '.')
+	 3 whitespace
 --]]
 
 local char_type = ffi.new("const int[256]", {
