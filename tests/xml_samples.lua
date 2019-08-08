@@ -1,6 +1,6 @@
-case1 = [[<cfg version="1.0"><ident>Test</ident></cfg>]]
+local case1 = [[<cfg version="1.0"><ident>Test</ident></cfg>]]
 
-case2 = [[<cfg  version = "2" >
+local case2 = [[<cfg  version = "2" >
 
 <ident >Test Name< /ident>
 <descr>A test xml data file with annoying spaces everywhere</descr>
@@ -12,7 +12,7 @@ case2 = [[<cfg  version = "2" >
 </cfg >
 ]]
 
-amf_case1 = [[<?xml version="1.0" encoding="UTF-8"?>
+local amf_case1 = [[<?xml version="1.0" encoding="UTF-8"?>
 <amf unit="millimeter">
   <object id="0">
     <mesh>

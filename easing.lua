@@ -13,6 +13,9 @@
     are expressed in the same units so they can be used to calculate a fraction
     of 'doneness'
 
+    This is very similar to using map(x, low, high, nlow, nhigh)
+    But, the function isn't strictly linear.
+
     References: 
     https://easings.net/en
     http://gizma.com/easing/

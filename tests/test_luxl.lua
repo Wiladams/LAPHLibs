@@ -2,9 +2,9 @@ package.path = package.path..";..\\?.lua";
 
 local ffi = require "ffi"
 
-luxl = require "luxl"
+local luxl = require "luxl"
 
-cases = require "xml_samples"
+local cases = require "xml_samples"
 require "luxl_util"
 require "stringzutils"
 
@@ -40,7 +40,6 @@ function test_xml()
 	--local buf = strdup(cases.saml2_xsd);
 	--local buf = strdup(cases.schema_case1);
 	local buf = strdup(cases.x3d_case1);
-
 	local len = strlen(buf)
 
 

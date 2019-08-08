@@ -2,12 +2,13 @@ package.path = package.path..";..\\?.lua";
 
 local ffi = require "ffi"
 local luxl = require "luxl"
-require "luxl_util"
+local luxl_util = require "luxl_util"
+local CreateXNode = luxl_util.CreateXNode
 
 local cases = require "xml_samples"
-require "stringzutils"
+local stringzutils = require "stringzutils"
 
-function CreateFlatXTable(xlex, currentelement)
+local function CreateFlatXTable(xlex, currentelement)
 	currentelement = currentelement or {}
 
 	local currentattributename = nil;
@@ -55,7 +56,7 @@ end
 
 
 
-function CollectXMLNodes(buff, len, offset)
+local function CollectXMLNodes(buff, len, offset)
 	offset = offset or 0
 
 	--print(buff, len);
@@ -73,7 +74,7 @@ end
 
 
 
-function printXNode(tbl, indent)
+local function printXNode(tbl, indent)
 	if not tbl then return end
 
 	indent = indent or '';
@@ -106,7 +107,7 @@ function printXNode(tbl, indent)
 
 end
 
-function main()
+local function main()
 
 	local buff = strdup(cases.saml2_xsd);
 	--local buff = strdup(cases.x3d_case1);
@@ -128,4 +129,4 @@ function main()
 	--print(tbl.amf.object.mesh.vertices.vertex.coordinates.z._Content);
 end
 
---main();
+main();

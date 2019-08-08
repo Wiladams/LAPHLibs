@@ -4,7 +4,6 @@ local ffi = require "ffi"
 
 local luxl = require "luxl"
 require "stringzutils"
-require "strtoul"
 require "memutils"
 
 ffi.cdef[[
@@ -25,32 +24,6 @@ local entity_refs =  ffi.new("const entity_t[6]", {
 })
 
 
---[[
-local state_str_mapper = {
-  [ST_START] ="start";
-  [ST_TEXT] ="text";
-  [ST_START_TAG] ="start tag";
-  [ST_START_TAGNAME] ="start tag name";
-  [ST_START_TAGNAME_END] ="start tag name end";
-  [ST_END_TAG] ="end tag";
-  [ST_END_TAGNAME] ="end tagname";
-  [ST_END_TAGNAME_END] ="end tag name end";
-  [ST_EMPTY_TAG] ="empty tag";
-  [ST_SPACE] ="space";
-  [ST_ATTR_NAME] ="attr name";
-  [ST_ATTR_NAME_END] ="attr name end";
-  [ST_ATTR_VAL] ="attr val";
-  [ST_ATTR_VAL2] ="attr val2";
-  [ST_ERROR] = "error";
-}
-
-function state_str(state)
-	local mapped = state_str_mapper[state] or "err"
-	return mapped
-end
---]]
-
-
 
 luxl_event_str_mapper = {
   [luxl.EVENT_START] = "start tag";
@@ -69,7 +42,7 @@ end
 
 -- Turn a pointer, offset, length of a string
 -- into an integer value
-GetInt = function(src, offset, len)
+local function GetInt(src, offset, len)
 	local TSIZE = 64
 
 	srcptr = ffi.cast("const uint8_t *", (src + offset));
@@ -96,7 +69,7 @@ end
 	document return null. Note: if text context has whitespace, it is
 	retained.
 --]]
-GetString = function (src, offset, len)
+local function GetString(src, offset, len)
 
 	local sz = len;
 	local buf = ffi.new("char[?]",(sz + 1));
