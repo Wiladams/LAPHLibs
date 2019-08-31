@@ -15,7 +15,7 @@
 
 local ffi = require "ffi"
 local bit = require "bit"
-local , bor = bit.band, bit.bor
+local band, bor = bit.band, bit.bor
 
 local B = string.byte
 

@@ -3,7 +3,7 @@
 
 local exports = {
 
-	INT_MIN = -128;
+	INT8_MIN = -128;
 	INT8_MAX = 127;
 	UINT8_MAX = 0xff;
 

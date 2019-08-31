@@ -15,8 +15,8 @@
 	In addition to core operations, there are some convenience operators
     as well.
     
-    Commentary:  I'm not sure I could ever recreate this from scrath
-    at the time of creation, I was solidly into matrix operations
+    Commentary:  I'm not sure I could ever recreate this from scratch.
+    At the time of creation, I was solidly into matrix operations
     as well as the LuaJIT parameterized types, so I think it came out well.
 
     Things work out great in terms of doing some algebra and math.

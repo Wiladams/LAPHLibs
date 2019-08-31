@@ -21,6 +21,7 @@ local exports = {
 function exports.constrain(x, low, high)
     return min(max(x, low), high)
 end
+exports.clamp = exports.constrain
 
 function exports.lerp(low, high, x)
     return low + x*(high-low)
@@ -113,14 +114,6 @@ function exports.min_bytes_needed(value)
     end
 
     return bytes;
-end
-
-function exports.clamp(x, low, high)
-    return math.min(math.max(x, low), high)
-end
-
-function exports.lerp(x, olow, ohigh, rlow, rhigh)
-    return rlow + (x-olow)*((rhigh-rlow)/(ohigh-olow))
 end
 
 return exports;
