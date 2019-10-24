@@ -27,7 +27,7 @@ local function test_vec()
 
 	print("sub")
 	print("v1 - v2: ", v1 - v2);
-	print("v1 - 0.025: ", v1 - 0.125);
+	print("v1 - 0.025: ", v1 - 0.025);
 
 
 	local xaxis = vec3(1,0,0);
@@ -388,7 +388,7 @@ local function test_swizzling()
 	print("t1 == t2: ", t1 == t2);
 end
 
---test_vec();
+test_vec();
 test_normal();
 --test_cofactor();
 --test_determinant();
@@ -401,4 +401,4 @@ test_normal();
 --test_matrix2();
 --test_swizzling();
 
---test_cubicSpline();
+test_cubicSpline();

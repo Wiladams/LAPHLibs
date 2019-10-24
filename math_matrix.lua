@@ -496,7 +496,7 @@ local function make_matrix_kind(ct, rows, columns)
 			local res = {};
 			for row=0,rows-1 do
 				for col=0,columns-1 do
-					table.insert(res,self:get(row, col));
+					table.insert(res,string.format("%3.3f",self:get(row, col)));
 					if col < columns-1 then
 						table.insert(res, ", ");
 					end
@@ -601,8 +601,9 @@ local function make_matrix_kind(ct, rows, columns)
 	-- Save the fact that we've created the type so that
 	-- we can return that same type next time it is asked for
 	matrix_kinds[typemoniker] = mat_kind;
+	ffi.metatype(mat_kind, mat_mt)
 
-	return ffi.metatype(mat_kind, mat_mt);
+	return mat_kind;
 end
 
 
@@ -614,9 +615,9 @@ return {
 	mat3 = make_matrix_kind(ffi.typeof("double"), 3,3);
 	mat4 = make_matrix_kind(ffi.typeof("double"), 4,4);
 
-	vec2 = make_matrix_kind(ffi.typeof("float"), 1, 2);
-	vec3 = make_matrix_kind(ffi.typeof("float"), 1, 3);
-	vec4 = make_matrix_kind(ffi.typeof("float"), 1, 4);
+	vec2 = make_matrix_kind(ffi.typeof("double"), 1, 2);
+	vec3 = make_matrix_kind(ffi.typeof("double"), 1, 3);
+	vec4 = make_matrix_kind(ffi.typeof("double"), 1, 4);
 
 	swizzlit = swizzlit;
 
