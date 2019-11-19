@@ -1,27 +1,22 @@
 LAPHLibs
 ========
 
-Lua Application Programming Helper Libraries
+Lua Application Programming Helper Libraries (LAPHLibs)
 
 This is a repository of things I have found to be useful
 while programming using LuaJIT.  As it seems to get some usage, I touch the files every once in a while when I find bugs, or better ways of doing things.
 
-As the purpose of most of these routines are to offer some amount of function typically found in standard C libraries, there is at least usage of bit operations, memmory manipulation, and the like.  For most of these cases, the LuaJIT ffi and "bit" modules are used.  So, this code is not necessarily meant for usage with vanilla Lua.
+As the purpose of most of these routines are to offer some amount of function typically found in standard C libraries, there is at least usage of bit operations, memory manipulation, and the like.  For most of these cases, the LuaJIT ffi and "bit" modules are used.  So, this code is not necessarily meant for usage with vanilla Lua.
 
 In cases where 'C' functions are being supported, it's important to note the memory allocation strategy.  For the most part, the 'C' semantics are utilized.  That is, in the case of 'strdup', for example, memory for the new string is allocated using malloc, and not ffi.new.  This means that whichever code was responsible for calling strdup in the first place will need to call 'free()' when they want to free up the string.  Such functions are primarily meant for interop with C library routines that accept a "char *", and will then take over ownership of that memory.  In most cases when the function is not going to hold onto the pointer ("const char *"), this string function should not be used.
 
 
 
-The original sets of routines came directly out of the earliest projects where I was learning to use the LuaJIT ffi mechanism.  As such, they were kind of rough, and a hodge podge of styles and usefulness.  Over time, various of the routines have been surpassed by better implementations in various projects, or by functions being implemented in the LuaJIT compiler itself.
+The original sets of routines came directly out of the earliest projects where I was learning to use the LuaJIT ffi mechanism.  As such, they were kind of rough, and a hodge podge of styles and usefulness.  Over time, various of the routines have been surpassed by better implementations in various projects, or by functions being implemented in the LuaJIT compiler itself.  They remain in the library as useful
+history and training.
 
-Latest: 13/02/2019
-	Added math_matrix, test_math_matrix
 
-Latest: 15/06/2015
-	Updated to ensure nothing spills into global namespace by default
-	Updated to use a consistent function signature style
-
-Current: Works against LUAJIT git HEAD as of 15/06/2015
+Current: Works against LUAJIT git HEAD as of 15 Jun 2015
 
 
 ascii.lua

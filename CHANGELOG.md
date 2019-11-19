@@ -1,7 +1,19 @@
+
+19 Nov 2019
+-----------
+* Added adler32, test_adler32
+* Created laphlibs directory, and moved everything there
+    
 22 Jun 2019
 ===========
-## A few additions
 * Adding easing.lua routines for value interpolation
+
+13 Feb 2019
+-----------
+* Added math_matrix, test_math_matrix
+
+
+
 
 17 Jun 2015
 ===========
@@ -48,3 +60,7 @@
 ##utf.lua
 * renamed functions
 * added to exports
+
+15 Jun 2015
+* Updated to ensure nothing spills into global namespace by default
+* Updated to use a consistent function signature style
