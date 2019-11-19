@@ -29,8 +29,6 @@ local function update_adler32(adler, buf, len)
     local s2 = ffi.cast("unsigned long", band(rshift(adler, 16), 0xffff))
     local n
 
-    print(type(s1), s1, type(s2), s2)
-
     for n=0, len-1 do
         s1 = (s1 + buf[n])  % BASE
         s2 = (s2 + s1)      % BASE
