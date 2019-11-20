@@ -1,7 +1,7 @@
 --[[
 	base64.lua
 	base64 encoding and decoding for LuaJIT
-	William Adams <william_a_adams@msn.com>
+	William Adams 
 	17 Mar 2012
 	This code is hereby placed in the public domain
 

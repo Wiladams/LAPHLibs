@@ -6,7 +6,7 @@ local bor = bit.bor
 local rshift = bit.rshift
 local lshift = bit.lshift
 
-local memutils = require "memutils"
+local memutils = require "laphlibs.memutils"
 local maths = require("maths")
 
 
