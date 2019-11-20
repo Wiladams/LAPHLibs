@@ -5,8 +5,9 @@
 	http://www.cplusplus.com/reference/clibrary/cctype/
 	http://www.cplusplus.com/reference/cctype/
 
-	These are good fold old time standard 7-bit
+	These are good for old time standard 7-bit
 	ASCII characters (0x00 .. 0x7f)
+	
 	These are not good for unicode codepoint usage,
 	and they don't support locale
 

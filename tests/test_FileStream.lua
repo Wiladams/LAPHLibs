@@ -1,6 +1,6 @@
 package.path = package.path..";../?.lua";
 
-local FileStream = require "filestream"
+local FileStream = require "laphlibs.filestream"
 
 local tst_filename = "data/tmp_filestream.bin";
 
