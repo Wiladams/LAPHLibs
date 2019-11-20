@@ -1,21 +1,30 @@
 local ffi = require "ffi"
 
 local bit = require "bit"
-local band = bit.band
-local bor = bit.bor
+local band, bor = bit.band, bit.bor
 local bxor = bit.bxor
 local bnot = bit.bnot
-local rshift = bit.rshift
+local lshift, rshift = bit.lshift, bit.rshift
 
 local uint64 = ffi.typeof("uint64_t")
 
--- return a value with the single bit
--- set.
+--[[
+	BIT
+
+	Return pow(2,bitnum)
+]]
+
 local function BIT(bitnum)
 	return 2^bitnum
 end
 
--- This will work for any number of bits from 32 to 63
+--[[
+	Set to '1' all the bits between lowbit and highbit
+	inclusive.
+
+	This will work for any number of bits from 32 to 63
+	and returns a uint64_t
+--]]
 local function BITMASK(lowbit, highbit)
 	local mask = 0ULL
 	for i=lowbit, highbit do
@@ -25,6 +34,9 @@ local function BITMASK(lowbit, highbit)
 	return mask 
 end
 
+--[[
+	Return a bitmask, limited to 32-bit 
+]]
 local function BITMASK32(lowbit, highbit)
 	-- create a mask which matches the desired range
 	-- of bits
@@ -38,11 +50,21 @@ local function BITMASK32(lowbit, highbit)
 	return mask
 end
 
+--[[
+	BISTVALUE
+
+	Return the integer value of a range of bits
+]]
 local function BITSVALUE(src, lowbit, highbit)
+	--print("BITSVALUE: ", src, lowbit, highbit)
 	lowbit = lowbit or 0
 	highbit = highbit or 0
 
-	return rshift(band(src, BITMASK(lowbit, highbit), lowbit))
+	local val = rshift(band(src, BITMASK(lowbit, highbit)), lowbit)
+
+	--print("val: ", val)
+
+	return val
 end
 
 local function getbitsvalue(src, lowbit, bitcount)
