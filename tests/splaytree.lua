@@ -85,7 +85,7 @@ function SplayTree.splay(self, key, root)
     header.rchild = nil;
 
     local LeftTreeMax = header;
-    local RightTreeMax = header;
+    local RightTreeMin = header;
 
     while true do
         if key < root.key then
@@ -106,7 +106,7 @@ function SplayTree.splay(self, key, root)
             root = root.lchild;
             RightTreeMin.lchild = nil;
         elseif key > root.key then
-            if not roo.rchild then
+            if not root.rchild then
                 break;
             end
             if key > root.rchild.key then
@@ -129,7 +129,7 @@ function SplayTree.splay(self, key, root)
 
     -- Assemble L Tree, Middle Tree, and R tree
     LeftTreeMax.rchild = root.lchild;
-    RightTreeMax.lchild = root.rchild;
+    RightTreeMin.lchild = root.rchild;
     root.lchild = header.rchild;
     root.rchild = header.lchild;
 
@@ -192,7 +192,7 @@ function SplayTree.delete(self, key, root)
     if key ~= root.key then
         return root
     else
-        if root.lchild ~= nil then
+        if not root.lchild then
             temp = root;
             root = root.rchild;
         else
@@ -205,27 +205,8 @@ function SplayTree.delete(self, key, root)
 end
 
 function SplayTree.search(self, key, root)
-    return self:Splay(key, root)
+    return self:splay(key, root)
 end
 
---[[
-    Braindead simple Iterator
-    This should turn into a real functional iterator
-]]
-function SplayTree.inOrder(self, root)
-    if root then
-        self:inOrder(root.lchild)
-        io.write("key: ", root.key)
-        if root.lchild then
-            io.write(" | left child: ", root.lchild.key)
-        end
-        if root.rchild then
-            io.write(" | right child: ", root.rchild.key)
-        end
-        print()
-
-        self:inOrder(root.rchild)
-    end
-end
 
 return SplayTree

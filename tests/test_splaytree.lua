@@ -16,9 +16,29 @@ local function initTree(st)
     end
 end
 
-local function test_inorder()
+--[[
+    Braindead simple Iterator
+    This should turn into a real functional iterator
+]]
+local function inOrder(root)
+    if root then
+        inOrder(root.lchild)
+        io.write("key: ", root.key)
+        if root.lchild then
+            io.write(" | left child: ", root.lchild.key)
+        end
+        if root.rchild then
+            io.write(" | right child: ", root.rchild.key)
+        end
+        print()
+
+        inOrder(root.rchild)
+    end
+end
+
+local function test_inorder(root)
     io.write("\nInOrder: \n");
-    st:inOrder(root);
+    inOrder(root);
 end
 
 local function test_input()
@@ -32,45 +52,45 @@ local function test_input()
         print("3. Search");
         print("4. Exit");
         io.write("Enter your choice: ");
-        choice = io.read()
+        choice = tonumber(io.read())
 
         print(type(choice), choice)
---[[
+
         if choice == 1 then
             io.write("Enter value to be inserted: ");
-            cin>>input;
-            root = st.Insert(input, root);
+            input = tonumber(io.read());
+            root = st:insert(input, root);
             io.write("\nAfter Insert: ", input,'\n');
             st:inOrder(root);
-            break;
+
         elseif choice == 2 then
             io.write("Enter value to be deleted: ");
-            cin>>input;
-            root = st.Delete(input, root);
+            input = tonumber(io.read());
+            root = st:delete(input, root);
             io.write("\nAfter Delete: ", input, '\n');
             st:inOrder(root);
-            break;
+
         elseif choice == 3 then
             io.write("Enter value to be searched: ");
-            cin>>input;
-            root = st.Search(input, root);
+            input = tonumber(io.read());
+            root = st:search(input, root);
             io.write("\nAfter Search ", input, '\n');
             st:inOrder(root);
-            break;
+
         elseif choice == 4 then
             return 1;
         else
             io.write("\nInvalid type! \n");
         end
---]]
+
     end
 
     print()
 end
 
 initTree(st)
-test_inorder()
-test_input()
+test_inorder(root)
+--test_input()
 
 
 
