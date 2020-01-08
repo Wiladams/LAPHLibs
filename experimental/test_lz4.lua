@@ -1,0 +1,1 @@
+local lz4 = require("lz4")
